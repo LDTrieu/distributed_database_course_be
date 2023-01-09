@@ -1,0 +1,18 @@
+# config for test
+
+forward:
+  timeout: 120
+server:
+  port: 8080
+  httpTimeout: 40
+mssql:
+  server: "DESKTOP-A42CKP3"
+  port: 1433
+  user: "sa"
+  password: 123456
+
+
+host:
+  address:
+        port: 5799
+
