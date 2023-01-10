@@ -5,6 +5,9 @@ import (
 	"log"
 )
 
+type traceField struct {
+	RequestId string `json:"reqId"`
+}
 type pingDBResponse struct {
 	Code    int          `json:"code"`
 	Message string       `json:"message"`
@@ -45,6 +48,8 @@ type loginResponse struct {
 }
 
 type login_resp struct {
+	UserName string `json:"userName"`
+	Token    string `json:"token"`
 }
 
 func (ins *loginRequest) validate() error {
@@ -66,4 +71,19 @@ func (ins *loginRequest) validate() error {
 	}
 
 	return nil
+}
+
+/* */
+type pongRequest struct {
+	Permit string `json:"permit"`
+}
+
+type pongResponse struct {
+	Code    int       `json:"code"`
+	Message string    `json:"message"`
+	Payload pong_resp `json:"payload"`
+}
+
+type pong_resp struct {
+	UserName string `json:"userName"`
 }

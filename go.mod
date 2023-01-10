@@ -3,12 +3,15 @@ module csdlpt
 go 1.19
 
 require (
+	github.com/denisenkom/go-mssqldb v0.12.3
 	github.com/gin-gonic/gin v1.8.2
+	github.com/golang-jwt/jwt v3.2.2+incompatible
+	github.com/google/uuid v1.1.2
 	github.com/spf13/viper v1.14.0
+	go.mongodb.org/mongo-driver v1.11.1
 )
 
 require (
-	github.com/denisenkom/go-mssqldb v0.12.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
