@@ -78,55 +78,39 @@ func (ins *dbServer) GetListCenter(ctx context.Context) (
 }
 
 func (ins *dbServer) Login(ctx context.Context, userName string) (
-	login_info *loginInfo, err error) {
-	// if len(userName) < 1 {
-	// 	return wutil.NewError("err")
-	// }
+	maGv, hoTen, tenNhom string, data_exist bool, err error) {
+	data_exist = true
 	err = mssql.RunQuery(func(d *sql.DB) error {
 		query := "USE TN_CSDLPT EXECUTE [dbo].[SP_DANGNHAP] @TENLOGIN ='" + userName + "' ;"
 		stmt, err := d.PrepareContext(ctx, query)
 		if err != nil {
 			return wutil.NewError(err)
 		}
-		log.Println("userName", userName)
 		defer stmt.Close()
-		rows, err := stmt.QueryContext(ctx, userName)
+		rows, err := stmt.QueryContext(ctx)
 		if err != nil {
-			log.Println("ERR: ", err)
 			return err
 		}
-		log.Println("rows: ", rows)
 		defer rows.Close()
-		log.Println("LINE 96")
+
 		for rows.Next() {
-			log.Println("LINE 98")
 			var (
-				ma_gv, ho_ten, ten_nhom sql.NullString
+				ho_ten sql.NullString
 			)
-			err := rows.Scan(&ma_gv, &ho_ten, &ten_nhom)
+			err := rows.Scan(&maGv, &ho_ten, &tenNhom)
 			if err != nil {
-				log.Println("LINE 103")
 				return wutil.NewError(err)
 			}
-			log.Println("ma_gv: ", ma_gv.String, "ho_ten: ", ho_ten.String, "ten_nhom: ", ten_nhom.String)
-			if ma_gv.Valid {
-				login_info.maGV = ma_gv.String
-			}
-			if ho_ten.Valid {
-				login_info.hoTen = ho_ten.String
-			}
-			if ten_nhom.Valid {
-				login_info.tenNhom = ten_nhom.String
-			}
-			log.Println("LINE 113")
-			log.Println("ma_gv: ", ma_gv.String, "ho_ten: ", ho_ten.String, "ten_nhom: ", ten_nhom.String)
-			//list = append(list, ten_cn)
 
+			if ho_ten.Valid {
+				hoTen = ho_ten.String
+			}
+			//list = append(list, ten_cn)
 		}
-		log.Println("END: ")
 		return nil
 	})
-	log.Println("login_info: ", login_info.hoTen)
-
+	if len(maGv) < 1 {
+		data_exist = false
+	}
 	return
 }

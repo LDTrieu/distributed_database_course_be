@@ -2,11 +2,20 @@ package api
 
 import (
 	"context"
+	"csdlpt/internal/auth"
 	"csdlpt/internal/mssql"
+	"csdlpt/library/ascii"
 	"csdlpt/model"
+	"csdlpt/pkg/token"
+	"errors"
+	"fmt"
 	"log"
+	"net/http"
+
+	"github.com/google/uuid"
 )
 
+/* */
 func __pingDB(ctx context.Context) (*pingDBResponse, error) {
 	// get count(*) table
 
@@ -22,7 +31,16 @@ func __pingDB(ctx context.Context) (*pingDBResponse, error) {
 }
 
 /* */
+func __pong(ctx context.Context, request *pongRequest) (*pongResponse, error) {
+	// handle
+	return &pongResponse{
+		Payload: pong_resp{
+			UserName: request.Permit,
+		},
+	}, nil
+}
 
+/* */
 // Get DS Phan Manh
 func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
 	// get list publisher_name from DB
@@ -54,8 +72,7 @@ func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
 
 /* */
 
-func __login(ctx context.Context, request *loginRequest) (
-	*loginResponse, error) {
+func __login(ctx context.Context, request *loginRequest) (*loginResponse, error) {
 	// Validate request
 	if err := request.validate(); err != nil {
 		return &loginResponse{
@@ -63,7 +80,28 @@ func __login(ctx context.Context, request *loginRequest) (
 			Message: "DATA_INVALID",
 		}, nil
 	}
-
+	_, ho_ten, _, data_exist, err := mssql.DBServerDBC.Login(ctx, request.UserName)
+	if err != nil {
+		return &loginResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error(),
+		}, nil
+	}
+	if data_exist == false {
+		return &loginResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	//validateBearer(ctx, ctx.Req)
+	// Gen auth token
+	_, jwt_login, err := auth.GenerateJWTLoginSession(ctx, request.UserName, ho_ten, request.Role, uuid.New().String())
+	if err != nil {
+		return &loginResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error(),
+		}, nil
+	}
 	// // exist user_name , password != nil => pass
 	// switch request.Role {
 	// case "giang_vien": // role is giang_vien
@@ -96,6 +134,74 @@ func __login(ctx context.Context, request *loginRequest) (
 	// call SP_DANG_NHAP
 
 	return &loginResponse{
-		Payload: login_resp{},
+		Payload: login_resp{
+			UserName: request.UserName,
+			Token:    jwt_login.Token,
+		},
 	}, nil
+}
+
+/* */
+func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.DataJWT, error) {
+	var (
+		excute = func(ctx context.Context, r *http.Request) (int, string, *auth.DataJWT, error) {
+			var (
+				// parseBearerAuth parses an HTTP Bearer Authentication string.
+				// "Bearer QWxhZGRpbjpvcGVuIHNlc2FtZQ==" returns QWxhZGRpbjpvcGVuIHNlc2FtZQ.
+				parseBearerAuth = func(auth string) (token string, ok bool) {
+					const prefix = "Bearer "
+					// Case insensitive prefix match. See Issue 22736.
+					if len(auth) < len(prefix) || !ascii.EqualFold(auth[:len(prefix)], prefix) {
+						return "", false
+					}
+					return auth[len(prefix):], true
+				}
+			)
+			headerAuth := r.Header.Get("Authorization")
+			if len(headerAuth) <= 0 {
+				return http.StatusBadRequest, "", &auth.DataJWT{}, errors.New("authorization is empty")
+			}
+			bearer_token, ok := parseBearerAuth(headerAuth)
+			if !ok {
+				return http.StatusBadRequest, "", &auth.DataJWT{}, errors.New("authorization is invalid")
+			}
+
+			// get from cache DB
+			// _, account_id, ok, err := fsdb.CacheLogin.Get(ctx, bearer_token)
+			// if err != nil {
+			// 	return http.StatusForbidden, bearer_token, &auth.DataJWT{}, err
+			// }
+			// if !ok {
+			// 	return http.StatusForbidden, bearer_token, &auth.DataJWT{}, errors.New("token no login")
+			// }
+			jwt_data, status, err := auth.ValidateLoginJWT(ctx, bearer_token)
+			if err != nil {
+				println("ValidateLoginJWT:", err.Error())
+			}
+			log.Println("jwt_data.UserName", jwt_data.UserName)
+			switch status {
+			case token.INPUT_EMPTY:
+				return http.StatusForbidden, bearer_token, jwt_data, errors.New("token is empty")
+			case token.ACCESS_TOKEN_INVALID:
+				return http.StatusForbidden, bearer_token, jwt_data, errors.New("token is invalid")
+			case token.ACCESS_TOKEN_EXPIRED:
+				return http.StatusForbidden, bearer_token, jwt_data, errors.New("token is expired")
+			case token.SUCCEED:
+				// auth pass
+				return http.StatusOK, bearer_token, jwt_data, nil
+			default:
+				return http.StatusForbidden, bearer_token, jwt_data, errors.New("validate token exception")
+			}
+		}
+	)
+
+	status, token, data, err := excute(ctx, r)
+	if err != nil {
+		println("[AUTH] ", r.RequestURI, "| Error:", err.Error())
+	}
+	println("[AUTH] ", r.RequestURI, "| Status:", status)
+	println("[AUTH] ", r.RequestURI, "| Token:", token)
+	println("[AUTH] ", r.RequestURI, "| Data:", data.UserName)
+	println("[AUTH] ", r.RequestURI, "| Access Rights:", fmt.Sprintf("%+v", data))
+	return status, token, data, err
 }

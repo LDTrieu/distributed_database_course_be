@@ -29,9 +29,14 @@ func Test_Ping(t *testing.T) {
 func Test_Login(t *testing.T) {
 	ctx := context.Background()
 	userName := "htkn"
-	login_info, err := DBServerDBC.Login(ctx, userName)
+	ma_gv, ho_ten, ten_nhom, data_exist, err := DBServerDBC.Login(ctx, userName)
 	if err != nil {
-		log.Println("ERR: ", err)
+		log.Fatal(err)
 	}
-	log.Fatal("login_info: ", login_info.hoTen)
+	if data_exist == false {
+		log.Println("DATA_NOT_EXIST")
+	}
+	log.Println("ma_gv", ma_gv, "ho_ten", ho_ten, "ten_nhom", ten_nhom)
+	log.Fatal("OKKK")
+	//log.Fatal("login_info: ", login_info.hoTen)
 }
