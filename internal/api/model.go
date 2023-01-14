@@ -1,13 +1,32 @@
 package api
 
 import (
+	"csdlpt/internal/mssql"
 	"errors"
 	"log"
+	"time"
 )
 
 type traceField struct {
 	RequestId string `json:"reqId"`
 }
+
+type permit struct {
+	UserName   string `json:"userName"`
+	FullName   string `json:"fullName"`
+	PrivKey    string `json:"privKey"`
+	CenterName string `json:"centerName"`
+	Role       string `json:"role"`
+}
+
+func withDBPermit(p permit) mssql.DBPermitModel {
+	return mssql.DBPermitModel{
+		UserName:   p.UserName,
+		CenterName: p.CenterName,
+		PrivKey:    p.PrivKey,
+	}
+}
+
 type pingDBResponse struct {
 	Code    int          `json:"code"`
 	Message string       `json:"message"`
@@ -86,4 +105,98 @@ type pongResponse struct {
 
 type pong_resp struct {
 	UserName string `json:"userName"`
+}
+
+/* */
+type listStaffRequest struct {
+	permit
+}
+type listStaffResponse struct {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Payload list_staff_resp `json:"payload"`
+}
+
+type list_staff_resp struct {
+	TotalStaff int          `json:"totalStaff"`
+	ListStaff  []staff_data `json:"listStaff"`
+}
+
+type staff_data struct {
+	UserName    string `json:"userName"`
+	FullName    string `json:"fullName"`
+	Address     string `json:"address"`
+	FacultyCode string `json:"facultyCode"`
+}
+
+func withStaffModel(sm *mssql.StaffModel) staff_data {
+	return staff_data{
+		UserName:    sm.MaGV,
+		FullName:    sm.HoTen,
+		Address:     sm.DiaChi,
+		FacultyCode: sm.MaKhoa,
+	}
+}
+
+// /* */
+// type listFacultyRequest struct {
+// 	Permit     string `json:"permit"`
+// 	CenterCode string `json:"centerCode"`
+// }
+// type listFacultyResponse struct {
+// 	Code    int               `json:"code"`
+// 	Message string            `json:"message"`
+// 	Payload list_faculty_resp `json:"payload"`
+// }
+
+// type list_faculty_resp struct {
+// 	TotalFaculty int            `json:"totalFaculty"`
+// 	ListFaculty  []faculty_data `json:"listFaculty"`
+// }
+
+// type faculty_data struct {
+// 	FacultyCode string `json:"facultyCode"`
+// 	FacultyName string `json:"facultyName"`
+// 	CenterCode  string `json:"centerCode"`
+// }
+
+// /* */
+// type listClassRequest struct {
+// 	Permit      string `json:"permit"`
+// 	FacultyCode string `json:"facultyCode"`
+// }
+// type listClassResponse struct {
+// 	Code    int             `json:"code"`
+// 	Message string          `json:"message"`
+// 	Payload list_class_resp `json:"payload"`
+// }
+
+// type list_class_resp struct {
+// 	TotalClass int          `json:"totalClass"`
+// 	ListClass  []class_data `json:"listClass"`
+// }
+
+// type class_data struct {
+// 	ClassCode   string `json:"classCode"`
+// 	ClassName   string `json:"className"`
+// 	FacultyCode string `json:"facultyCode"`
+// }
+
+/* */
+type createStaffRequest struct {
+	permit
+	UserName    string    `json:"userName"` // StaffCode
+	FirstName   string    `json:"firstName"`
+	LastName    string    `json:"lastName"`
+	DateOfBirth time.Time `json:"dateOfBirth"`
+	Address     string    `json:"address"`
+	ClassCode   string    `json:"classCode"`
+}
+
+type createStaffResponse struct {
+	Code    int          `json:"code"`
+	Message string       `json:"message"`
+	Payload create_staff `json:"payload"`
+}
+type create_staff struct {
 }

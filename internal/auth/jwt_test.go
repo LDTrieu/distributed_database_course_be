@@ -10,7 +10,7 @@ func Test_JWT_Full(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 	t.Logf("STEP_1: GenerateJWTLoginSession")
-	id, login_access, err := GenerateJWTLoginSession(ctx, "user_name", "full_name", "center", "1234567890")
+	id, login_access, err := GenerateJWTLoginSession(ctx, "user_name", "full_name", "role_1", "center_1", "1234567890")
 	if err != nil {
 		t.Errorf("GenerateJWTLoginSession: %+v\n", err)
 		return

@@ -2,17 +2,19 @@ package api
 
 import (
 	"csdlpt/pkg/wlog"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 func Reg(router *gin.Engine) {
-	router.GET("/api/portal/ping-db", pingDB)
-	router.POST("/api/portal/pong", pong)
 	router.GET("/api/login/info", loginInfo)
 	router.POST("/api/login/login", login)
+	router.GET("/api/portal/ping-db", pingDB)
+	router.POST("/api/portal/pong", pong)
+	//
+	router.GET("/api/portal/list/staff", listStaff)
+	router.POST("/api/portal/create/staff", createStaff)
 }
 
 /* */
@@ -33,11 +35,7 @@ func pong(c *gin.Context) {
 		c.AbortWithError(status, err)
 		return
 	}
-	log.Println(token_data)
-	log.Println(token_data.FullName)
-	log.Println(token_data.Role)
-	log.Println(token_data.UserName)
-	log.Println(token_data.SessionID)
+
 	var (
 		request = &pongRequest{
 			Permit: token_data.UserName,
@@ -82,4 +80,64 @@ func login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
+
+/* */
+func listStaff(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+
+	var (
+		request = listStaffRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+	resp, err := __listStaff(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
+}
+
+/* */
+
+func createStaff(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = createStaffRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := __createStaff(c.Request.Context(), request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
 }

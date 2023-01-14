@@ -18,7 +18,6 @@ import (
 /* */
 func __pingDB(ctx context.Context) (*pingDBResponse, error) {
 	// get count(*) table
-
 	a, err := mssql.DBServerDBC.Ping(ctx)
 	if err != nil {
 		log.Println("ERR: ", err)
@@ -36,107 +35,6 @@ func __pong(ctx context.Context, request *pongRequest) (*pongResponse, error) {
 	return &pongResponse{
 		Payload: pong_resp{
 			UserName: request.Permit,
-		},
-	}, nil
-}
-
-/* */
-// Get DS Phan Manh
-func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
-	// get list publisher_name from DB
-	db_pubs, err := mssql.DBServerDBC.GetListCenter(ctx)
-	if err != nil {
-		log.Println("ERR: ", err)
-		return &loginInfoResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error()}, err
-
-	}
-	//log.Println("db_pubs: ", db_pubs)
-	// DB layer to Handle layer
-	var (
-		list_center = make([]string, 0)
-	)
-
-	for _, center := range db_pubs {
-		list_center = append(list_center, string(center))
-	}
-
-	return &loginInfoResponse{
-		Payload: login_info_resp{
-			ListCenter:  list_center,
-			TotalCenter: len(list_center),
-		},
-	}, nil
-}
-
-/* */
-
-func __login(ctx context.Context, request *loginRequest) (*loginResponse, error) {
-	// Validate request
-	if err := request.validate(); err != nil {
-		return &loginResponse{
-			Code:    model.StatusBadRequest,
-			Message: "DATA_INVALID",
-		}, nil
-	}
-	_, ho_ten, _, data_exist, err := mssql.DBServerDBC.Login(ctx, request.UserName)
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-	if data_exist == false {
-		return &loginResponse{
-			Code:    model.StatusDataNotFound,
-			Message: "DATA_NOT_EXIST",
-		}, nil
-	}
-	//validateBearer(ctx, ctx.Req)
-	// Gen auth token
-	_, jwt_login, err := auth.GenerateJWTLoginSession(ctx, request.UserName, ho_ten, request.Role, uuid.New().String())
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-	// // exist user_name , password != nil => pass
-	// switch request.Role {
-	// case "giang_vien": // role is giang_vien
-	// 	log.Println("giang_vien")
-
-	// 	user_name, err := mssql.DBServerDBC.GetListCenter(ctx)
-	// 	if err != nil {
-	// 		log.Println("ERR: ", err)
-	// 		return &loginResponse{
-	// 			Code:    model.StatusServiceUnavailable,
-	// 			Message: err.Error()}, err
-
-	// 	}
-	// case "sinh_vien": // role is sinh_vien
-	// 	log.Println("sinh_vien")
-	// case "co_so": // role is co_so
-	// 	log.Println("co_so")
-	// case "truong": // role is truong
-	// 	log.Println("truong")
-	// default:
-	// 	return &loginResponse{
-	// 		Code:    model.StatusDataNotFound,
-	// 		Message: "DATA_NOT_FOUND",
-	// 	}, nil
-	// }
-
-	//log.Println("db_pubs: ", db_pubs)
-	// DB layer to Handle layer
-
-	// call SP_DANG_NHAP
-
-	return &loginResponse{
-		Payload: login_resp{
-			UserName: request.UserName,
-			Token:    jwt_login.Token,
 		},
 	}, nil
 }
@@ -204,4 +102,141 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 	println("[AUTH] ", r.RequestURI, "| Data:", data.UserName)
 	println("[AUTH] ", r.RequestURI, "| Access Rights:", fmt.Sprintf("%+v", data))
 	return status, token, data, err
+}
+
+/* */
+// Get DS Phan Manh
+func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
+	// get list publisher_name from DB
+	db_pubs, err := mssql.DBServerDBC.GetListCenter(ctx)
+	if err != nil {
+		log.Println("ERR: ", err)
+		return &loginInfoResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	//log.Println("db_pubs: ", db_pubs)
+	// DB layer to Handle layer
+	var (
+		list_center = make([]string, 0)
+	)
+
+	for _, center := range db_pubs {
+		list_center = append(list_center, string(center))
+	}
+
+	return &loginInfoResponse{
+		Payload: login_info_resp{
+			ListCenter:  list_center,
+			TotalCenter: len(list_center),
+		},
+	}, nil
+}
+
+/* */
+
+func __login(ctx context.Context, request *loginRequest) (*loginResponse, error) {
+	// Validate request
+	if err := request.validate(); err != nil {
+		return &loginResponse{
+			Code:    model.StatusBadRequest,
+			Message: "DATA_INVALID",
+		}, nil
+	}
+	_, ho_ten, _, data_exist, err := mssql.DBServerDBC.Login(ctx, request.UserName)
+	if err != nil {
+		return &loginResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error(),
+		}, nil
+	}
+	if data_exist == false {
+		return &loginResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	//validateBearer(ctx, ctx.Req)
+	// Gen auth token
+	_, jwt_login, err := auth.GenerateJWTLoginSession(ctx, request.UserName, ho_ten, request.Role, request.CenterName, uuid.New().String())
+	if err != nil {
+		return &loginResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error(),
+		}, nil
+	}
+	// // exist user_name , password != nil => pass
+	// switch request.Role {
+	// case "giang_vien": // role is giang_vien
+	// 	log.Println("giang_vien")
+
+	// 	user_name, err := mssql.DBServerDBC.GetListCenter(ctx)
+	// 	if err != nil {
+	// 		log.Println("ERR: ", err)
+	// 		return &loginResponse{
+	// 			Code:    model.StatusServiceUnavailable,
+	// 			Message: err.Error()}, err
+
+	// 	}
+	// case "sinh_vien": // role is sinh_vien
+	// 	log.Println("sinh_vien")
+	// case "co_so": // role is co_so
+	// 	log.Println("co_so")
+	// case "truong": // role is truong
+	// 	log.Println("truong")
+	// default:
+	// 	return &loginResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_FOUND",
+	// 	}, nil
+	// }
+
+	//log.Println("db_pubs: ", db_pubs)
+	// DB layer to Handle layer
+
+	// call SP_DANG_NHAP
+
+	return &loginResponse{
+		Payload: login_resp{
+			UserName: request.UserName,
+			Token:    jwt_login.Token,
+		},
+	}, nil
+}
+
+/* */
+func __listStaff(ctx context.Context, request *listStaffRequest) (list *listStaffResponse, err error) {
+	var (
+		list_staff = make([]staff_data, 0)
+		db_staffs  = make([]mssql.StaffModel, 0)
+	)
+	// Check center
+
+	db_staffs, err = mssql.StaffDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listStaffResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	for _, staff := range db_staffs {
+		list_staff = append(list_staff, withStaffModel(&staff))
+	}
+	return &listStaffResponse{
+		Payload: list_staff_resp{
+			TotalStaff: len(list_staff),
+			ListStaff:  list_staff,
+		},
+	}, nil
+}
+
+func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffRequest, error) {
+	// Check MaGV
+
+	// Check MaGV in side 3 (trên tất cả server)
+
+	// Add
+
+	return &createStaffRequest{}, nil
 }
