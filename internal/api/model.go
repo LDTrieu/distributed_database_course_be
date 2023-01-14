@@ -138,27 +138,35 @@ func withStaffModel(sm *mssql.StaffModel) staff_data {
 	}
 }
 
-// /* */
-// type listFacultyRequest struct {
-// 	Permit     string `json:"permit"`
-// 	CenterCode string `json:"centerCode"`
-// }
-// type listFacultyResponse struct {
-// 	Code    int               `json:"code"`
-// 	Message string            `json:"message"`
-// 	Payload list_faculty_resp `json:"payload"`
-// }
+/* */
+type listFacultyRequest struct {
+	Permit     string `json:"permit"`
+	CenterCode string `json:"centerCode"`
+}
+type listFacultyResponse struct {
+	Code    int               `json:"code"`
+	Message string            `json:"message"`
+	Payload list_faculty_resp `json:"payload"`
+}
 
-// type list_faculty_resp struct {
-// 	TotalFaculty int            `json:"totalFaculty"`
-// 	ListFaculty  []faculty_data `json:"listFaculty"`
-// }
+type list_faculty_resp struct {
+	TotalFaculty int            `json:"totalFaculty"`
+	ListFaculty  []faculty_data `json:"listFaculty"`
+}
 
-// type faculty_data struct {
-// 	FacultyCode string `json:"facultyCode"`
-// 	FacultyName string `json:"facultyName"`
-// 	CenterCode  string `json:"centerCode"`
-// }
+type faculty_data struct {
+	FacultyCode string `json:"facultyCode"`
+	FacultyName string `json:"facultyName"`
+	CenterCode  string `json:"centerCode"`
+}
+
+func withFacultyModel(sm *mssql.StaffModel) faculty_data {
+	return faculty_data{
+		FacultyName: sm.MaGV,
+		FacultyCode: sm.HoTen,
+		CenterCode:  sm.DiaChi,
+	}
+}
 
 // /* */
 // type listClassRequest struct {

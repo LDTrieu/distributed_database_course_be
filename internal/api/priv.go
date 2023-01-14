@@ -151,7 +151,7 @@ func __login(ctx context.Context, request *loginRequest) (*loginResponse, error)
 			Message: err.Error(),
 		}, nil
 	}
-	if data_exist == false {
+	if !data_exist {
 		return &loginResponse{
 			Code:    model.StatusDataNotFound,
 			Message: "DATA_NOT_EXIST",
@@ -231,12 +231,24 @@ func __listStaff(ctx context.Context, request *listStaffRequest) (list *listStaf
 	}, nil
 }
 
-func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffRequest, error) {
-	// Check MaGV
+func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffResponse, error) {
 
-	// Check MaGV in side 3 (trên tất cả server)
+	// Check data_exist in DB
+	_, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
+	if err != nil {
+		return &createStaffResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
 
-	// Add
+	}
+	if data_exist {
+		return &createStaffResponse{
+			Code:    model.StatusDataDuplicated,
+			Message: err.Error()}, errors.New("resource already exists")
+	}
 
-	return &createStaffRequest{}, nil
+	// add item to DB
+	// create account with Staff Permision
+
+	return &createStaffResponse{}, nil
 }

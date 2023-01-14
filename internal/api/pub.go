@@ -141,3 +141,30 @@ func createStaff(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 }
+
+/* */
+func listStaff(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+
+	var (
+		request = listStaffRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+	resp, err := __listStaff(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
+}
