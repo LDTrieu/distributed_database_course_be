@@ -11,7 +11,7 @@ const (
 	dur_time = 24 * time.Hour
 )
 
-func GenerateJWTLoginSession(ctx context.Context, user_name, full_name, role, session_id string) (
+func GenerateJWTLoginSession(ctx context.Context, user_name, full_name, role, center_name, session_id string) (
 	id string, token_access *token.JWTDetails, err error) {
 	jwtKey, err := loadPrePrivKey(ctx)
 	if err != nil {
@@ -19,10 +19,11 @@ func GenerateJWTLoginSession(ctx context.Context, user_name, full_name, role, se
 	}
 	return token.GenerateJWT(jwtKey, dur_time,
 		&DataJWT{
-			SessionID: session_id,
-			UserName:  user_name,
-			FullName:  full_name,
-			Role:      role, // WARNING: role should not be saved in token (RFC 9068)
+			SessionID:  session_id,
+			UserName:   user_name,
+			FullName:   full_name,
+			CenterName: center_name,
+			Role:       role, // WARNING: role should not be saved in token (RFC 9068)
 		})
 
 }
