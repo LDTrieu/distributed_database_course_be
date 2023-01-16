@@ -252,3 +252,29 @@ func __createStaff(ctx context.Context, request createStaffRequest) (*createStaf
 
 	return &createStaffResponse{}, nil
 }
+
+/* */
+func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *listFacultyResponse, err error) {
+	var (
+		list_faculty = make([]faculty_data, 0)
+		db_facultys  = make([]mssql.FacultyModel, 0)
+	)
+	// Check center
+
+	db_facultys, err = mssql.FacultyDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listFacultyResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	for _, faculty := range db_facultys {
+		list_faculty = append(list_faculty, withFacultyModel(&faculty))
+	}
+	return &listFacultyResponse{
+		Payload: list_faculty_resp{
+			TotalFaculty: len(list_faculty),
+			ListFaculty:  list_faculty,
+		},
+	}, nil
+}

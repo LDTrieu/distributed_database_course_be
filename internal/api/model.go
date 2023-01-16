@@ -140,8 +140,7 @@ func withStaffModel(sm *mssql.StaffModel) staff_data {
 
 /* */
 type listFacultyRequest struct {
-	Permit     string `json:"permit"`
-	CenterCode string `json:"centerCode"`
+	permit
 }
 type listFacultyResponse struct {
 	Code    int               `json:"code"`
@@ -160,11 +159,11 @@ type faculty_data struct {
 	CenterCode  string `json:"centerCode"`
 }
 
-func withFacultyModel(sm *mssql.StaffModel) faculty_data {
+func withFacultyModel(fm *mssql.FacultyModel) faculty_data {
 	return faculty_data{
-		FacultyName: sm.MaGV,
-		FacultyCode: sm.HoTen,
-		CenterCode:  sm.DiaChi,
+		FacultyName: fm.TenKH,
+		FacultyCode: fm.MaKH,
+		CenterCode:  fm.MaCS,
 	}
 }
 

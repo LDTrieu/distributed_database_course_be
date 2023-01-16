@@ -12,9 +12,21 @@ func Reg(router *gin.Engine) {
 	router.POST("/api/login/login", login)
 	router.GET("/api/portal/ping-db", pingDB)
 	router.POST("/api/portal/pong", pong)
-	//
+
+	//Staff
 	router.GET("/api/portal/list/staff", listStaff)
 	router.POST("/api/portal/create/staff", createStaff)
+
+	// Faculty
+	router.GET("/api/portal/list/faculty", listFaculty)
+
+	// Student
+	//router.GET("/api/portal/list/student", listStudent)
+
+	// Class
+
+	// Subject
+
 }
 
 /* */
@@ -143,7 +155,7 @@ func createStaff(c *gin.Context) {
 }
 
 /* */
-func listStaff(c *gin.Context) {
+func listFaculty(c *gin.Context) {
 	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
 	if err != nil {
 		c.AbortWithError(status, err)
@@ -151,7 +163,7 @@ func listStaff(c *gin.Context) {
 	}
 
 	var (
-		request = listStaffRequest{
+		request = listFacultyRequest{
 			permit: permit{
 				UserName:   data.UserName,
 				FullName:   data.FullName,
@@ -160,7 +172,8 @@ func listStaff(c *gin.Context) {
 			},
 		}
 	)
-	resp, err := __listStaff(c.Request.Context(), &request)
+
+	resp, err := __listFaculty(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
 	}
