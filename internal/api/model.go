@@ -207,3 +207,23 @@ type createStaffResponse struct {
 }
 type create_staff struct {
 }
+
+/* */
+
+type createCenterStaffRequest struct {
+	permit
+	UserName    string    `json:"userName"` // StaffCode
+	FirstName   string    `json:"firstName"`
+	LastName    string    `json:"lastName"`
+	DateOfBirth time.Time `json:"dateOfBirth"`
+	Address     string    `json:"address"`
+	ClassCode   string    `json:"classCode"`
+}
+
+type createCenterStaffResponse struct {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Payload create_center_staff `json:"payload"`
+}
+type create_center_staff struct {
+}
