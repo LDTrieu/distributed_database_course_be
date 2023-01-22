@@ -138,27 +138,34 @@ func withStaffModel(sm *mssql.StaffModel) staff_data {
 	}
 }
 
-// /* */
-// type listFacultyRequest struct {
-// 	Permit     string `json:"permit"`
-// 	CenterCode string `json:"centerCode"`
-// }
-// type listFacultyResponse struct {
-// 	Code    int               `json:"code"`
-// 	Message string            `json:"message"`
-// 	Payload list_faculty_resp `json:"payload"`
-// }
+/* */
+type listFacultyRequest struct {
+	permit
+}
+type listFacultyResponse struct {
+	Code    int               `json:"code"`
+	Message string            `json:"message"`
+	Payload list_faculty_resp `json:"payload"`
+}
 
-// type list_faculty_resp struct {
-// 	TotalFaculty int            `json:"totalFaculty"`
-// 	ListFaculty  []faculty_data `json:"listFaculty"`
-// }
+type list_faculty_resp struct {
+	TotalFaculty int            `json:"totalFaculty"`
+	ListFaculty  []faculty_data `json:"listFaculty"`
+}
 
-// type faculty_data struct {
-// 	FacultyCode string `json:"facultyCode"`
-// 	FacultyName string `json:"facultyName"`
-// 	CenterCode  string `json:"centerCode"`
-// }
+type faculty_data struct {
+	FacultyCode string `json:"facultyCode"`
+	FacultyName string `json:"facultyName"`
+	CenterCode  string `json:"centerCode"`
+}
+
+func withFacultyModel(fm *mssql.FacultyModel) faculty_data {
+	return faculty_data{
+		FacultyName: fm.TenKH,
+		FacultyCode: fm.MaKH,
+		CenterCode:  fm.MaCS,
+	}
+}
 
 // /* */
 // type listClassRequest struct {
@@ -199,4 +206,24 @@ type createStaffResponse struct {
 	Payload create_staff `json:"payload"`
 }
 type create_staff struct {
+}
+
+/* */
+
+type createCenterStaffRequest struct {
+	permit
+	UserName    string    `json:"userName"` // StaffCode
+	FirstName   string    `json:"firstName"`
+	LastName    string    `json:"lastName"`
+	DateOfBirth time.Time `json:"dateOfBirth"`
+	Address     string    `json:"address"`
+	ClassCode   string    `json:"classCode"`
+}
+
+type createCenterStaffResponse struct {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Payload create_center_staff `json:"payload"`
+}
+type create_center_staff struct {
 }

@@ -12,9 +12,24 @@ func Reg(router *gin.Engine) {
 	router.POST("/api/login/login", login)
 	router.GET("/api/portal/ping-db", pingDB)
 	router.POST("/api/portal/pong", pong)
-	//
+
+	// Center
+	router.POST("/api/portal/create/staff-center", createCenterStaff)
+
+	//Staff
 	router.GET("/api/portal/list/staff", listStaff)
 	router.POST("/api/portal/create/staff", createStaff)
+
+	// Faculty
+	router.GET("/api/portal/list/faculty", listFaculty)
+
+	// Student
+	//router.GET("/api/portal/list/student", listStudent)
+
+	// Class
+
+	// Subject
+
 }
 
 /* */
@@ -134,6 +149,66 @@ func createStaff(c *gin.Context) {
 	}
 
 	resp, err := __createStaff(c.Request.Context(), request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
+}
+
+/* */
+func listFaculty(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+
+	var (
+		request = listFacultyRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+
+	resp, err := __listFaculty(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
+}
+
+/* */
+func createCenterStaff(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = createCenterStaffRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := __createCenterStaff(c.Request.Context(), request)
 	if err != nil {
 		wlog.Error(c, err)
 	}

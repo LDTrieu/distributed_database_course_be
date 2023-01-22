@@ -6,32 +6,31 @@ import (
 	"testing"
 )
 
-func Test_GetListStaff(t *testing.T) {
+func Test_GetListFaculty(t *testing.T) {
 	ctx := context.Background()
 	db_permit := DBPermitModel{
 		CenterName: "CS2",
 		UserName:   "htkn",
 	}
 
-	list, err := StaffDBC.GetAll(ctx, db_permit)
+	list, err := FacultyDBC.GetAll(ctx, db_permit)
 	if err != nil {
 		log.Println("ERR: ", err)
 	}
 	log.Fatal("list: ", list)
 }
 
-func Test_GetStaff(t *testing.T) {
+func Test_GetFaculty(t *testing.T) {
 	ctx := context.Background()
 	db_permit := DBPermitModel{
 		CenterName: "CS2",
 		UserName:   "htkn",
 	}
 	// TH657
-	ma_gv := "TH657"
-	staff, _, err := StaffDBC.Get(ctx, db_permit, ma_gv)
+	ma_kh := "TH657"
+	faculty, data_exist, err := FacultyDBC.Get(ctx, db_permit, ma_kh)
 	if err != nil {
 		log.Println("ERR: ", err)
 	}
-	log.Fatal("staff: ", staff)
-
+	log.Fatal("faculty: ", faculty, "data_exist: ", data_exist)
 }

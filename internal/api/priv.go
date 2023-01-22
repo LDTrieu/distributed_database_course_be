@@ -151,7 +151,7 @@ func __login(ctx context.Context, request *loginRequest) (*loginResponse, error)
 			Message: err.Error(),
 		}, nil
 	}
-	if data_exist == false {
+	if !data_exist {
 		return &loginResponse{
 			Code:    model.StatusDataNotFound,
 			Message: "DATA_NOT_EXIST",
@@ -231,12 +231,80 @@ func __listStaff(ctx context.Context, request *listStaffRequest) (list *listStaf
 	}, nil
 }
 
-func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffRequest, error) {
-	// Check MaGV
+func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffResponse, error) {
 
-	// Check MaGV in side 3 (trên tất cả server)
+	// Check data_exist in DB
+	_, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
+	if err != nil {
+		return &createStaffResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
 
-	// Add
+	}
+	if data_exist {
+		return &createStaffResponse{
+			Code:    model.StatusDataDuplicated,
+			Message: err.Error()}, errors.New("resource already exists")
+	}
 
-	return &createStaffRequest{}, nil
+	// add item to DB
+	// create account with Staff Permision
+
+	return &createStaffResponse{}, nil
+}
+
+/* */
+func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *listFacultyResponse, err error) {
+	var (
+		list_faculty = make([]faculty_data, 0)
+		db_facultys  = make([]mssql.FacultyModel, 0)
+	)
+	// Check center
+
+	db_facultys, err = mssql.FacultyDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listFacultyResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	for _, faculty := range db_facultys {
+		list_faculty = append(list_faculty, withFacultyModel(&faculty))
+	}
+	return &listFacultyResponse{
+		Payload: list_faculty_resp{
+			TotalFaculty: len(list_faculty),
+			ListFaculty:  list_faculty,
+		},
+	}, nil
+}
+
+/* */
+func __createCenterStaff(ctx context.Context, request createCenterStaffRequest) (*createCenterStaffResponse, error) {
+
+	// Check permition request - Role Center
+	if request.permit.Role != "CENTER" {
+		return &createCenterStaffResponse{
+				Code:    model.StatusForbidden,
+				Message: "ACCESS_DENIED"},
+			errors.New("user access denied")
+	}
+	// Check data_exist in DB
+	_, data_exist, err := mssql.CenterStaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
+	if err != nil {
+		return &createCenterStaffResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if data_exist {
+		return &createCenterStaffResponse{
+			Code:    model.StatusDataDuplicated,
+			Message: err.Error()}, errors.New("resource already exists")
+	}
+
+	// add item to DB
+	// create account with Staff Permision
+
+	return &createCenterStaffResponse{}, nil
 }
