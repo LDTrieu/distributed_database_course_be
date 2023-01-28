@@ -244,7 +244,23 @@ func __createStaff(ctx context.Context, request createStaffRequest) (*createStaf
 				Message: "NOT_PERMISSION_UNI"}, nil
 		}
 		// RUN
-		// check data_exist (Check Mã Giảng Viên)
+		// check data_exist (Check Mã Giảng Viên). Input maGV, out data_exist (run View)
+		// request.LoginName TH20x
+		_, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), "TH402")
+		if err != nil {
+			return &createStaffResponse{
+				Code:    model.StatusServiceUnavailable,
+				Message: err.Error()}, err
+
+		}
+		if !data_exist {
+			return &createStaffResponse{
+				Code:    model.StatusDataDuplicated,
+				Message: "DATA_ALREADY_EXIST"}, errors.New("device is duplicated")
+		}
+
+		// Nếu chưa, tạo tài khoản mới
+		//mssql.StaffDBC.Create(ctx, )
 
 		// run SP tạo đăng nhập
 
@@ -252,9 +268,11 @@ func __createStaff(ctx context.Context, request createStaffRequest) (*createStaf
 		log.Println("COSO")
 		switch request.StaffRole {
 		case "GIANGVIEN":
+			// TH50x
 			log.Println("GIANGVIEN")
 
 		case "COSO":
+			// TH30x
 			log.Println("COSO")
 
 		default:
