@@ -192,12 +192,13 @@ func withFacultyModel(fm *mssql.FacultyModel) faculty_data {
 /* */
 type createStaffRequest struct {
 	permit
-	UserName    string    `json:"userName"` // StaffCode
+	LoginName   string    `json:"loginName"` // StaffCode
 	FirstName   string    `json:"firstName"`
 	LastName    string    `json:"lastName"`
 	DateOfBirth time.Time `json:"dateOfBirth"`
 	Address     string    `json:"address"`
-	ClassCode   string    `json:"classCode"`
+	StaffRole   string    `json:"staffRole"`
+	FacultyCode string    `json:"facultyCode"`
 }
 
 type createStaffResponse struct {
@@ -208,22 +209,47 @@ type createStaffResponse struct {
 type create_staff struct {
 }
 
-/* */
+func (ins *createStaffRequest) validate() error {
+	if len(ins.LoginName) < 1 {
+		log.Println("ins.LoginName", ins.LoginName)
+		return errors.New("field LoginName is invalid")
+	}
+	if len(ins.FirstName) < 1 {
+		log.Println("ins.FirstName", ins.FirstName)
+		return errors.New("field FirstName is invalid")
+	}
+	if len(ins.LastName) < 1 {
+		log.Println("ins.LastName", ins.LastName)
+		return errors.New("field LastName is invalid")
+	}
+	if len(ins.StaffRole) < 1 {
+		log.Println("ins.StaffRole", ins.StaffRole)
+		return errors.New("field StaffRole is invalid")
+	}
+	if len(ins.FacultyCode) < 1 {
+		log.Println("ins.FacultyCode", ins.FacultyCode)
+		return errors.New("field FacultyCode is invalid")
+	}
 
-type createCenterStaffRequest struct {
-	permit
-	UserName    string    `json:"userName"` // StaffCode
-	FirstName   string    `json:"firstName"`
-	LastName    string    `json:"lastName"`
-	DateOfBirth time.Time `json:"dateOfBirth"`
-	Address     string    `json:"address"`
-	ClassCode   string    `json:"classCode"`
+	return nil
 }
 
-type createCenterStaffResponse struct {
-	Code    int                 `json:"code"`
-	Message string              `json:"message"`
-	Payload create_center_staff `json:"payload"`
-}
-type create_center_staff struct {
-}
+// /* */
+
+// type createCenterStaffRequest struct {
+// 	permit
+// 	UserName    string    `json:"userName"` // StaffCode
+// 	FirstName   string    `json:"firstName"`
+// 	LastName    string    `json:"lastName"`
+// 	DateOfBirth time.Time `json:"dateOfBirth"`
+// 	Address     string    `json:"address"`
+// 	ClassCode   string    `json:"classCode"`
+// }
+
+// type createCenterStaffResponse struct {
+// 	Code    int                 `json:"code"`
+// 	Message string              `json:"message"`
+// 	Payload create_center_staff `json:"payload"`
+// }
+// type create_center_staff struct {
+// }

@@ -233,8 +233,67 @@ func __listStaff(ctx context.Context, request *listStaffRequest) (list *listStaf
 
 func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffResponse, error) {
 
+	// Check Permission and StaffRole
+	switch request.Role {
+	case "TRUONG":
+		log.Println("TRUONG")
+		// StaffRole != TRUONG -> return
+		if request.StaffRole != "TRUONG" {
+			return &createStaffResponse{
+				Code:    model.StatusForbidden,
+				Message: "NOT_PERMISSION_UNI"}, nil
+		}
+		// RUN
+		// check data_exist (Check Mã Giảng Viên). Input maGV, out data_exist (run View)
+		// request.LoginName TH20x
+		_, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), "TH402")
+		if err != nil {
+			return &createStaffResponse{
+				Code:    model.StatusServiceUnavailable,
+				Message: err.Error()}, err
+
+		}
+		if !data_exist {
+			return &createStaffResponse{
+				Code:    model.StatusDataDuplicated,
+				Message: "DATA_ALREADY_EXIST"}, errors.New("device is duplicated")
+		}
+
+		// Nếu chưa, tạo tài khoản mới
+		//mssql.StaffDBC.Create(ctx, )
+
+		// run SP tạo đăng nhập
+
+	case "COSO":
+		log.Println("COSO")
+		switch request.StaffRole {
+		case "GIANGVIEN":
+			// TH50x
+			log.Println("GIANGVIEN")
+
+		case "COSO":
+			// TH30x
+			log.Println("COSO")
+
+		default:
+			return &createStaffResponse{
+				Code:    model.StatusForbidden,
+				Message: "NOT_PERMISSION_CENTER"}, nil
+		}
+	case "GIANGVIEN":
+		log.Println("GIANGVIEN")
+		return &createStaffResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION_CENTER"}, nil
+	default:
+		log.Println("ERROR")
+		return &createStaffResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_FOUND"}, nil
+	}
+
 	// Check data_exist in DB
-	_, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
+	data_staff, data_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
 	if err != nil {
 		return &createStaffResponse{
 			Code:    model.StatusServiceUnavailable,
@@ -246,6 +305,7 @@ func __createStaff(ctx context.Context, request createStaffRequest) (*createStaf
 			Code:    model.StatusDataDuplicated,
 			Message: err.Error()}, errors.New("resource already exists")
 	}
+	log.Println(data_staff.TenNhom)
 
 	// add item to DB
 	// create account with Staff Permision
@@ -279,32 +339,32 @@ func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *list
 	}, nil
 }
 
-/* */
-func __createCenterStaff(ctx context.Context, request createCenterStaffRequest) (*createCenterStaffResponse, error) {
+// /* */
+// func __createCenterStaff(ctx context.Context, request createCenterStaffRequest) (*createCenterStaffResponse, error) {
 
-	// Check permition request - Role Center
-	if request.permit.Role != "CENTER" {
-		return &createCenterStaffResponse{
-				Code:    model.StatusForbidden,
-				Message: "ACCESS_DENIED"},
-			errors.New("user access denied")
-	}
-	// Check data_exist in DB
-	_, data_exist, err := mssql.CenterStaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
-	if err != nil {
-		return &createCenterStaffResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error()}, err
+// 	// Check permition request - Role Center
+// 	if request.permit.Role != "CENTER" {
+// 		return &createCenterStaffResponse{
+// 				Code:    model.StatusForbidden,
+// 				Message: "ACCESS_DENIED"},
+// 			errors.New("user access denied")
+// 	}
+// 	// Check data_exist in DB
+// 	_, data_exist, err := mssql.CenterStaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
+// 	if err != nil {
+// 		return &createCenterStaffResponse{
+// 			Code:    model.StatusServiceUnavailable,
+// 			Message: err.Error()}, err
 
-	}
-	if data_exist {
-		return &createCenterStaffResponse{
-			Code:    model.StatusDataDuplicated,
-			Message: err.Error()}, errors.New("resource already exists")
-	}
+// 	}
+// 	if data_exist {
+// 		return &createCenterStaffResponse{
+// 			Code:    model.StatusDataDuplicated,
+// 			Message: err.Error()}, errors.New("resource already exists")
+// 	}
 
-	// add item to DB
-	// create account with Staff Permision
+// 	// add item to DB
+// 	// create account with Staff Permision
 
-	return &createCenterStaffResponse{}, nil
-}
+// 	return &createCenterStaffResponse{}, nil
+// }
