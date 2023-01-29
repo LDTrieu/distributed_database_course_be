@@ -35,6 +35,21 @@ func Test_GetAllUserName(t *testing.T) {
 	log.Fatal("list: ", list)
 }
 
+// GetAllUserName
+func Test_GetAllStaffWithoutUserName(t *testing.T) {
+	ctx := context.Background()
+	db_permit := DBPermitModel{
+		CenterName: "CS1",
+		UserName:   "htkn",
+	}
+
+	list, err := StaffDBC.GetAllStaffWithoutUserName(ctx, db_permit)
+	if err != nil {
+		log.Println("ERR: ", err)
+	}
+	log.Fatal("list: ", list)
+}
+
 func Test_GetStaff(t *testing.T) {
 	ctx := context.Background()
 	db_permit := DBPermitModel{
@@ -67,5 +82,62 @@ func Test_GetUserName(t *testing.T) {
 	}
 	log.Println("data_not_exist", data_not_exist, "ERR: ", err)
 	log.Fatal("staff: ", staff)
+}
 
+// CheckUserName
+func Test_CheckUserName(t *testing.T) {
+	ctx := context.Background()
+	db_permit := DBPermitModel{
+		CenterName: "CS1",
+		UserName:   "htkn",
+	}
+	// TH204
+	ma_gv := "TH407"
+	staff, data_not_exist, err := StaffDBC.CheckUserName(ctx, db_permit, ma_gv)
+	if err != nil {
+		log.Println("ERR: ", err)
+	}
+	log.Println("data_not_exist", data_not_exist, "ERR: ", err)
+	log.Fatal("staff: ", staff)
+}
+
+// GetStaffWithoutUserName
+func Test_GetStaffWithoutUserName(t *testing.T) {
+	ctx := context.Background()
+	db_permit := DBPermitModel{
+		CenterName: "CS1",
+		UserName:   "htkn",
+	}
+	// TH204
+	ma_gv := "TH202"
+	staff, data_not_exist, err := StaffDBC.GetStaffWithoutUserName(ctx, db_permit, ma_gv)
+	if err != nil {
+		log.Println("ERR: ", err)
+	}
+	log.Println("data_not_exist", data_not_exist, "ERR: ", err)
+	log.Fatal("staff: ", staff)
+}
+
+// Create
+func Test_Create(t *testing.T) {
+	ctx := context.Background()
+	db_permit := DBPermitModel{
+		CenterName: "CS1",
+		UserName:   "sa",
+	}
+	// TH204
+	staff := StaffModel{
+		MaGV:   "TH209",
+		Ho:     "Nguyen",
+		Ten:    "Minh",
+		DiaChi: "97 Man Thien",
+		MaKhoa: "CNTT",
+	}
+
+	err := StaffDBC.Create(ctx, db_permit, staff)
+	if err != nil {
+		log.Println("ERR: ", err)
+	}
+
+	log.Fatal("OK")
 }

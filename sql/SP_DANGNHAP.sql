@@ -11,3 +11,27 @@ AS
 
 	SELECT MAGV =@MA,
 		HOTEN = (SELECT HO + ' ' + TEN FROM dbo.GIAOVIEN WHERE MAGV=@MAGV),
+
+
+--
+USE [TN_CSDLPT]
+GO
+/****** Object:  StoredProcedure [dbo].[SP_DANGNHAP]    Script Date: 1/29/2023 11:07:19 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+
+ALTER PROC [dbo].[SP_DANGNHAP]
+	@TENLOGIN NVARCHAR(100)
+AS
+	DECLARE @UID INT
+	DECLARE @MAGV NVARCHAR(100)
+	SELECT @UID= uid , @MAGV= NAME FROM sys.sysusers 
+  	WHERE sid = SUSER_SID(@TENLOGIN)
+
+	SELECT  MAGV= @MAGV, 
+       		HOTEN = (SELECT HO + ' '+ TEN FROM dbo.GIAOVIEN WHERE MAGV=@MAGV ), 
+			TENNHOM=NAME
+	FROM sys.sysusers 
+	WHERE UID = (SELECT groupuid  FROM sys.sysmembers WHERE memberuid=@uid)
