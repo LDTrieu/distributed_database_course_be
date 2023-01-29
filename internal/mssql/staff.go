@@ -239,3 +239,27 @@ func (ins *staff) Create(ctx context.Context, db_permit DBPermitModel, staff Sta
 	err = mssql.RunQuery(act, withDBConfigModel(&db_permit))
 	return
 }
+
+// Create Login
+func (ins *staff) CreateLogin(ctx context.Context, db_permit DBPermitModel, staff StaffModel) (err error) {
+
+	var (
+		act = func(d *sql.DB) error {
+			query := " USE TN_CSDLPT EXEC SP_CREATE_GIANGVIEN @MAGV ='" +
+				staff.MaGV + "',@HO ='" +
+				staff.Ho + "',@TEN='" +
+				staff.Ten + "',@DIACHI ='" +
+				staff.DiaChi + "', @MAKH ='" +
+				staff.MaKhoa + "'"
+			//query := "USE TN_CSDLPT EXEC SP_CREATE_GIANGVIEN @MAGV ='TH208',@HO ='PHAM',@TEN='HANNI',@DIACHI ='Australian', @MAKH ='CNTT'"
+			_, err := d.Exec(query)
+			if err != nil {
+				return wutil.NewError(err)
+			}
+
+			return nil
+		}
+	)
+	err = mssql.RunQuery(act, withDBConfigModel(&db_permit))
+	return
+}
