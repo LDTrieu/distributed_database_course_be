@@ -27,6 +27,13 @@ func withDBPermit(p permit) mssql.DBPermitModel {
 	}
 }
 
+func withRequestPermission(request *loginRequest) mssql.DBPermitModel {
+	return mssql.DBPermitModel{
+		UserName:   "sa",
+		CenterName: request.CenterName,
+	}
+}
+
 type pingDBResponse struct {
 	Code    int          `json:"code"`
 	Message string       `json:"message"`
@@ -124,9 +131,12 @@ type list_staff_resp struct {
 
 type staff_data struct {
 	UserName    string `json:"userName"`
+	FirstName   string `json:"firstName"`
+	LastName    string `json:"lastName"`
 	FullName    string `json:"fullName"`
 	Address     string `json:"address"`
 	FacultyCode string `json:"facultyCode"`
+	StaffRole   string `json:"staffRole"`
 }
 
 func withStaffModel(sm *mssql.StaffModel) staff_data {
@@ -135,6 +145,18 @@ func withStaffModel(sm *mssql.StaffModel) staff_data {
 		FullName:    sm.HoTen,
 		Address:     sm.DiaChi,
 		FacultyCode: sm.MaKhoa,
+	}
+}
+
+func withStaffData(sd *staff_data) mssql.StaffModel {
+	return mssql.StaffModel{
+		MaGV:    sd.UserName,
+		Ho:      sd.FirstName,
+		Ten:     sd.LastName,
+		HoTen:   sd.FullName,
+		DiaChi:  sd.Address,
+		MaKhoa:  sd.FacultyCode,
+		TenNhom: sd.StaffRole,
 	}
 }
 

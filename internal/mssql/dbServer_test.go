@@ -28,9 +28,12 @@ func Test_Ping(t *testing.T) {
 // Login
 func Test_Login(t *testing.T) {
 	ctx := context.Background()
-	userName := "htkn"
-	//center_name := "CS1"
-	ma_gv, ho_ten, ten_nhom, data_exist, err := DBServerDBC.Login(ctx, userName)
+	userName := "th302_coso"
+	db_permit := DBPermitModel{
+		CenterName: "CS1",
+		UserName:   "sa",
+	}
+	ma_gv, ho_ten, ten_nhom, data_exist, err := DBServerDBC.Login(ctx, db_permit, userName)
 	if err != nil {
 		log.Fatal(err)
 	}

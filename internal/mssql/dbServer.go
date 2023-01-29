@@ -80,12 +80,12 @@ func (ins *dbServer) GetListCenter(ctx context.Context) (list []string, err erro
 	return
 }
 
-func (ins *dbServer) Login(ctx context.Context, userName string) (
+func (ins *dbServer) Login(ctx context.Context, db_permit DBPermitModel, login_name string) (
 	maGv, hoTen, tenNhom string, data_exist bool, err error) {
 	data_exist = true
 	var (
 		act = func(d *sql.DB) error {
-			query := "USE TN_CSDLPT EXECUTE [dbo].[SP_DANGNHAP] @TENLOGIN ='" + userName + "' ;"
+			query := "USE TN_CSDLPT EXECUTE [dbo].[SP_DANGNHAP] @TENLOGIN ='" + login_name + "' ;"
 			stmt, err := d.PrepareContext(ctx, query)
 			if err != nil {
 				return wutil.NewError(err)
@@ -114,7 +114,8 @@ func (ins *dbServer) Login(ctx context.Context, userName string) (
 			return nil
 		}
 	)
-	err = mssql.RunAdminQuery(act)
+	//err = mssql.RunAdminQuery(act)
+	err = mssql.RunQuery(act, withDBConfigModel(&db_permit))
 	if len(maGv) < 1 {
 		data_exist = false
 	}
