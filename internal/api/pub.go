@@ -184,35 +184,3 @@ func listFaculty(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 
 }
-
-// /* */
-// func createCenterStaff(c *gin.Context) {
-// 	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
-// 	if err != nil {
-// 		c.AbortWithError(status, err)
-// 		return
-// 	}
-// 	var (
-// 		request = createCenterStaffRequest{
-// 			permit: permit{
-// 				UserName:   data.UserName,
-// 				FullName:   data.FullName,
-// 				CenterName: data.CenterName,
-// 				Role:       data.Role,
-// 			},
-// 		}
-// 	)
-
-// 	if err := c.BindJSON(&request); err != nil {
-// 		c.AbortWithError(http.StatusBadRequest, err)
-// 		return
-// 	}
-
-// 	resp, err := __createCenterStaff(c.Request.Context(), request)
-// 	if err != nil {
-// 		wlog.Error(c, err)
-// 	}
-
-// 	c.JSON(http.StatusOK, resp)
-
-// }
