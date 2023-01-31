@@ -5,6 +5,9 @@ import (
 	wutil "csdlpt/internal/wUtil"
 	"csdlpt/mssql"
 	"database/sql"
+	"fmt"
+	"log"
+	"strings"
 )
 
 type StaffModel struct {
@@ -244,19 +247,18 @@ func (ins *staff) Create(ctx context.Context, db_permit DBPermitModel, staff Sta
 func (ins *staff) CreateLogin(ctx context.Context, db_permit DBPermitModel, staff StaffModel) (err error) {
 
 	var (
-		act = func(d *sql.DB) error {
-			query := " USE TN_CSDLPT EXEC SP_CREATE_GIANGVIEN @MAGV ='" +
-				staff.MaGV + "',@HO ='" +
-				staff.Ho + "',@TEN='" +
-				staff.Ten + "',@DIACHI ='" +
-				staff.DiaChi + "', @MAKH ='" +
-				staff.MaKhoa + "'"
-			//query := "USE TN_CSDLPT EXEC SP_CREATE_GIANGVIEN @MAGV ='TH208',@HO ='PHAM',@TEN='HANNI',@DIACHI ='Australian', @MAKH ='CNTT'"
+		login_name = fmt.Sprintf("%s%s%s", strings.ToLower(staff.MaGV), "_", strings.ToLower(staff.TenNhom))
+		user_name  = strings.ToUpper(staff.MaGV)
+		role       = strings.ToUpper(staff.TenNhom)
+		act        = func(d *sql.DB) error {
+			query := " DECLARE @R1 int EXEC [SP_TAO_LOGIN] @LGNAME ='" + login_name +
+				"',@PASS='123456',@USERNAME ='" + user_name +
+				"', @ROLE='" + role + "', @rs = @R1 OUTPUT SELECT  @R1"
+			log.Println("query: ", query)
 			_, err := d.Exec(query)
 			if err != nil {
 				return wutil.NewError(err)
 			}
-
 			return nil
 		}
 	)

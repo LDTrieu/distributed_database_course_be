@@ -2,7 +2,9 @@ package mssql
 
 import (
 	"context"
+	"fmt"
 	"log"
+	"strings"
 	"testing"
 )
 
@@ -140,4 +142,10 @@ func Test_Create(t *testing.T) {
 	}
 
 	log.Fatal("OK")
+}
+
+// Test_ToLower_string
+func Test_string(t *testing.T) {
+	login_name := fmt.Sprintf("%s%s%s", strings.ToLower("staff.MaGV"), "_", strings.ToLower("staff.TenNhom"))
+	log.Fatal(login_name)
 }

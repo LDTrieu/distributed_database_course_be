@@ -76,7 +76,6 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 			if err != nil {
 				println("ValidateLoginJWT:", err.Error())
 			}
-			log.Println("jwt_data.UserName", jwt_data.UserName)
 			switch status {
 			case token.INPUT_EMPTY:
 				return http.StatusForbidden, bearer_token, jwt_data, errors.New("token is empty")
@@ -238,7 +237,6 @@ func __createStaff(ctx context.Context, request createStaffRequest) (*createStaf
 	switch request.Role {
 	case "TRUONG":
 		log.Println("TRUONG")
-		// StaffRole != TRUONG -> return
 		if request.StaffRole != "TRUONG" {
 			return &createStaffResponse{
 				Code:    model.StatusForbidden,
@@ -360,33 +358,3 @@ func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *list
 		},
 	}, nil
 }
-
-// /* */
-// func __createCenterStaff(ctx context.Context, request createCenterStaffRequest) (*createCenterStaffResponse, error) {
-
-// 	// Check permition request - Role Center
-// 	if request.permit.Role != "CENTER" {
-// 		return &createCenterStaffResponse{
-// 				Code:    model.StatusForbidden,
-// 				Message: "ACCESS_DENIED"},
-// 			errors.New("user access denied")
-// 	}
-// 	// Check data_exist in DB
-// 	_, data_exist, err := mssql.CenterStaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
-// 	if err != nil {
-// 		return &createCenterStaffResponse{
-// 			Code:    model.StatusServiceUnavailable,
-// 			Message: err.Error()}, err
-
-// 	}
-// 	if data_exist {
-// 		return &createCenterStaffResponse{
-// 			Code:    model.StatusDataDuplicated,
-// 			Message: err.Error()}, errors.New("resource already exists")
-// 	}
-
-// 	// add item to DB
-// 	// create account with Staff Permision
-
-// 	return &createCenterStaffResponse{}, nil
-// }
