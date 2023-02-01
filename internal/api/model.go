@@ -188,28 +188,43 @@ func withFacultyModel(fm *mssql.FacultyModel) faculty_data {
 		CenterCode:  fm.MaCS,
 	}
 }
+func withFacultyData(fd *faculty_data) mssql.FacultyModel {
+	return mssql.FacultyModel{
+		MaCS:  fd.CenterCode,
+		TenKH: fd.FacultyName,
+		MaKH:  fd.FacultyCode,
+	}
+}
 
-// /* */
-// type listClassRequest struct {
-// 	Permit      string `json:"permit"`
-// 	FacultyCode string `json:"facultyCode"`
-// }
-// type listClassResponse struct {
-// 	Code    int             `json:"code"`
-// 	Message string          `json:"message"`
-// 	Payload list_class_resp `json:"payload"`
-// }
+/* */
+type listClassRequest struct {
+	permit
+	FacultyCode string `json:"facultyCode"`
+}
+type listClassResponse struct {
+	Code    int             `json:"code"`
+	Message string          `json:"message"`
+	Payload list_class_resp `json:"payload"`
+}
 
-// type list_class_resp struct {
-// 	TotalClass int          `json:"totalClass"`
-// 	ListClass  []class_data `json:"listClass"`
-// }
+type list_class_resp struct {
+	TotalClass int          `json:"totalClass"`
+	ListClass  []class_data `json:"listClass"`
+}
 
-// type class_data struct {
-// 	ClassCode   string `json:"classCode"`
-// 	ClassName   string `json:"className"`
-// 	FacultyCode string `json:"facultyCode"`
-// }
+type class_data struct {
+	ClassCode   string `json:"classCode"`
+	ClassName   string `json:"className"`
+	FacultyCode string `json:"facultyCode"`
+}
+
+func withClassModel(cm *mssql.ClassModel) class_data {
+	return class_data{
+		ClassCode:   cm.MaLop,
+		ClassName:   cm.TenLop,
+		FacultyCode: cm.MaKH,
+	}
+}
 
 /* */
 type createStaffRequest struct {
@@ -256,22 +271,19 @@ func (ins *createStaffRequest) validate() error {
 	return nil
 }
 
-// /* */
+/* */
+type createFacultyRequest struct {
+	permit
+	FacultyCode string `json:"facultyCode"`
+	FacultyName string `json:"facultyName"`
+	CenterCode  string `json:"centerCode"`
+}
 
-// type createCenterStaffRequest struct {
-// 	permit
-// 	UserName    string    `json:"userName"` // StaffCode
-// 	FirstName   string    `json:"firstName"`
-// 	LastName    string    `json:"lastName"`
-// 	DateOfBirth time.Time `json:"dateOfBirth"`
-// 	Address     string    `json:"address"`
-// 	ClassCode   string    `json:"classCode"`
-// }
+type createFacultyResponse struct {
+	Code    int            `json:"code"`
+	Message string         `json:"message"`
+	Payload create_faculty `json:"payload"`
+}
 
-// type createCenterStaffResponse struct {
-// 	Code    int                 `json:"code"`
-// 	Message string              `json:"message"`
-// 	Payload create_center_staff `json:"payload"`
-// }
-// type create_center_staff struct {
-// }
+type create_faculty struct {
+}

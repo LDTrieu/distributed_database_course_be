@@ -297,7 +297,6 @@ func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *list
 		db_facultys  = make([]mssql.FacultyModel, 0)
 	)
 	// Check center
-
 	db_facultys, err = mssql.FacultyDBC.GetAll(ctx, withDBPermit(request.permit))
 	if err != nil {
 		return &listFacultyResponse{
@@ -312,6 +311,63 @@ func __listFaculty(ctx context.Context, request *listFacultyRequest) (list *list
 		Payload: list_faculty_resp{
 			TotalFaculty: len(list_faculty),
 			ListFaculty:  list_faculty,
+		},
+	}, nil
+}
+
+/* */
+func __createFaculty(ctx context.Context, request createFacultyRequest) (*createFacultyResponse, error) {
+	var (
+		faculty = &faculty_data{
+			FacultyCode: request.FacultyCode,
+			FacultyName: request.FacultyName,
+			CenterCode:  request.CenterCode,
+		}
+	)
+
+	// Check Permission and StaffRole
+	switch request.Role {
+	case "COSO":
+		if err := mssql.FacultyDBC.Create(ctx, withDBPermit(request.permit), withFacultyData(faculty)); err != nil {
+			return &createFacultyResponse{
+				Code:    model.StatusServiceUnavailable,
+				Message: err.Error()}, err
+		}
+	default:
+		return &createFacultyResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION"}, nil
+	}
+
+	return &createFacultyResponse{}, nil
+}
+
+/* */
+func __listClass(ctx context.Context, request *listClassRequest) (list *listClassResponse, err error) {
+	var (
+		list_class = make([]class_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_classes, data_not_exist, err := mssql.ClassDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listClassResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if !data_not_exist {
+		return &listClassResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	for _, class := range db_classes {
+		list_class = append(list_class, withClassModel(&class))
+	}
+	return &listClassResponse{
+		Payload: list_class_resp{
+			TotalClass: len(list_class),
+			ListClass:  list_class,
 		},
 	}, nil
 }
