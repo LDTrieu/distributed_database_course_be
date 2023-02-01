@@ -25,7 +25,7 @@ var FacultyDBC = &faculty{}
 func (ins *faculty) GetAll(ctx context.Context, db_permit DBPermitModel) (list []FacultyModel, err error) {
 	var (
 		act = func(d *sql.DB) error {
-			query := "USE TN_CSDLPT SELECT MAKH, TENKH, MACS  FROM [dbo].[V_DS_KHOA];"
+			query := "USE TN_CSDLPT SELECT MAKH, TENKH, MACS  FROM [dbo].[KHOA];"
 			stmt, err := d.PrepareContext(ctx, query)
 			if err != nil {
 				return wutil.NewError(err)

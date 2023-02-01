@@ -22,13 +22,15 @@ func Reg(router *gin.Engine) {
 	router.POST("/api/portal/create/faculty", createFaculty)
 
 	// Student
-	//router.GET("/api/portal/list/student", listStudent)
+	router.GET("/api/portal/list/student", listStudent)
 
 	// Class
 	router.GET("/api/portal/list/class", listClass)
-	//router.POST("/api/portal/create/class", createClass)
+	router.POST("/api/portal/create/class", createClass)
 
-	// Subject
+	// Course
+	router.GET("/api/portal/list/course", listCourse)
+	//router.POST("/api/portal/create/course", createCourse)
 
 }
 
@@ -231,6 +233,118 @@ func listClass(c *gin.Context) {
 		}
 	)
 	resp, err := __listClass(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+/* */
+func createClass(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = createClassRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+
+	if err := c.BindJSON(&request); err != nil {
+		c.AbortWithError(http.StatusBadRequest, err)
+		return
+	}
+
+	resp, err := __createClass(c.Request.Context(), request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+
+	c.JSON(http.StatusOK, resp)
+
+}
+
+/* */
+func listCourse(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = listCourseRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+	resp, err := __listCourse(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+/* */
+// func createCourse(c *gin.Context) {
+// 	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+// 	if err != nil {
+// 		c.AbortWithError(status, err)
+// 		return
+// 	}
+// 	var (
+// 		request = createClassRequest{
+// 			permit: permit{
+// 				UserName:   data.UserName,
+// 				FullName:   data.FullName,
+// 				CenterName: data.CenterName,
+// 				Role:       data.Role,
+// 			},
+// 		}
+// 	)
+
+// 	if err := c.BindJSON(&request); err != nil {
+// 		c.AbortWithError(http.StatusBadRequest, err)
+// 		return
+// 	}
+
+// 	resp, err := __createClass(c.Request.Context(), request)
+// 	if err != nil {
+// 		wlog.Error(c, err)
+// 	}
+
+// 	c.JSON(http.StatusOK, resp)
+
+// }
+
+/* */
+func listStudent(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = listStudentRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+	resp, err := __listStudent(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
 	}

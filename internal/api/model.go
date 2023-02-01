@@ -3,6 +3,7 @@ package api
 import (
 	"csdlpt/internal/mssql"
 	"errors"
+	"fmt"
 	"log"
 	"time"
 )
@@ -141,8 +142,11 @@ type staff_data struct {
 
 func withStaffModel(sm *mssql.StaffModel) staff_data {
 	return staff_data{
-		UserName:    sm.MaGV,
+		UserName: sm.MaGV,
+		//FullName:    fmt.Sprintf("%s%s", sm.Ho, sm.Ten),
 		FullName:    sm.HoTen,
+		FirstName:   sm.Ho,
+		LastName:    sm.Ten,
 		Address:     sm.DiaChi,
 		FacultyCode: sm.MaKhoa,
 	}
@@ -199,7 +203,6 @@ func withFacultyData(fd *faculty_data) mssql.FacultyModel {
 /* */
 type listClassRequest struct {
 	permit
-	FacultyCode string `json:"facultyCode"`
 }
 type listClassResponse struct {
 	Code    int             `json:"code"`
@@ -224,6 +227,31 @@ func withClassModel(cm *mssql.ClassModel) class_data {
 		ClassName:   cm.TenLop,
 		FacultyCode: cm.MaKH,
 	}
+}
+
+func withClassData(cd *class_data) mssql.ClassModel {
+	return mssql.ClassModel{
+		MaLop:  cd.ClassCode,
+		TenLop: cd.ClassName,
+		MaKH:   cd.FacultyCode,
+	}
+}
+
+/* */
+type createClassRequest struct {
+	permit
+	ClassCode   string `json:"classCode"`
+	ClassName   string `json:"className"`
+	FacultyCode string `json:"facultyCode"`
+}
+
+type createClassResponse struct {
+	Code    int          `json:"code"`
+	Message string       `json:"message"`
+	Payload create_class `json:"payload"`
+}
+
+type create_class struct {
 }
 
 /* */
@@ -287,3 +315,81 @@ type createFacultyResponse struct {
 
 type create_faculty struct {
 }
+
+/* */
+type listCourseRequest struct {
+	permit
+}
+type listCourseResponse struct {
+	Code    int              `json:"code"`
+	Message string           `json:"message"`
+	Payload list_course_resp `json:"payload"`
+}
+
+type list_course_resp struct {
+	TotalCourse int           `json:"totalCourse"`
+	ListCourse  []course_data `json:"listCourse"`
+}
+
+type course_data struct {
+	CourseCode string `json:"courseCode"`
+	CourseName string `json:"courseName"`
+}
+
+func withCourseModel(cm *mssql.CourseModel) course_data {
+	return course_data{
+		CourseCode: cm.MaMH,
+		CourseName: cm.TenMH,
+	}
+}
+
+func withCourseData(cd *course_data) mssql.CourseModel {
+	return mssql.CourseModel{
+		MaMH:  cd.CourseCode,
+		TenMH: cd.CourseName,
+	}
+}
+
+/* */
+type listStudentRequest struct {
+	permit
+}
+type listStudentResponse struct {
+	Code    int               `json:"code"`
+	Message string            `json:"message"`
+	Payload list_student_resp `json:"payload"`
+}
+
+type list_student_resp struct {
+	TotalStudent int            `json:"totalStudent"`
+	ListStudent  []student_data `json:"listStudent"`
+}
+
+type student_data struct {
+	StudentCode string    `json:"studentCode"` // userName
+	FirstName   string    `json:"firstName"`
+	LastName    string    `json:"lastName"`
+	FullName    string    `json:"fullName"`
+	DateOfBirth time.Time `json:"dateOfBirth"`
+	Address     string    `json:"address"`
+	ClassCode   string    `json:"classCode"`
+}
+
+func withStudentModel(sm *mssql.StudentModel) student_data {
+	return student_data{
+		StudentCode: sm.MaSV,
+		FirstName:   sm.Ho,
+		LastName:    sm.Ten,
+		FullName:    fmt.Sprintf("%s%s", sm.Ho, sm.Ten),
+		DateOfBirth: sm.NgaySinh,
+		Address:     sm.DiaChi,
+		ClassCode:   sm.MaLop,
+	}
+}
+
+// func withStudentData(cd *student_data) mssql.StudentModel {
+// 	return mssql.StudentModel{
+// 		MaMH:  cd.CourseCode,
+// 		TenMH: cd.CourseName,
+// 	}
+// }

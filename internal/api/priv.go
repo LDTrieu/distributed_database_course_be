@@ -355,7 +355,7 @@ func __listClass(ctx context.Context, request *listClassRequest) (list *listClas
 			Message: err.Error()}, err
 
 	}
-	if !data_not_exist {
+	if data_not_exist {
 		return &listClassResponse{
 			Code:    model.StatusDataNotFound,
 			Message: "DATA_NOT_EXIST",
@@ -368,6 +368,93 @@ func __listClass(ctx context.Context, request *listClassRequest) (list *listClas
 		Payload: list_class_resp{
 			TotalClass: len(list_class),
 			ListClass:  list_class,
+		},
+	}, nil
+}
+
+/* */
+func __createClass(ctx context.Context, request createClassRequest) (*createClassResponse, error) {
+	var (
+		class = &class_data{
+			ClassCode:   request.ClassCode,
+			ClassName:   request.ClassName,
+			FacultyCode: request.FacultyCode,
+		}
+	)
+
+	// Check Permission and StaffRole
+	switch request.Role {
+	case "COSO":
+		if err := mssql.ClassDBC.Create(ctx, withDBPermit(request.permit), withClassData(class)); err != nil {
+			return &createClassResponse{
+				Code:    model.StatusServiceUnavailable,
+				Message: err.Error()}, err
+		}
+	default:
+		return &createClassResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION"}, nil
+	}
+
+	return &createClassResponse{}, nil
+}
+
+/* */
+func __listCourse(ctx context.Context, request *listCourseRequest) (list *listCourseResponse, err error) {
+	var (
+		list_course = make([]course_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_courses, data_not_exist, err := mssql.CourseDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listCourseResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if data_not_exist {
+		return &listCourseResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	for _, course := range db_courses {
+		list_course = append(list_course, withCourseModel(&course))
+	}
+	return &listCourseResponse{
+		Payload: list_course_resp{
+			TotalCourse: len(list_course),
+			ListCourse:  list_course,
+		},
+	}, nil
+}
+
+/* */
+func __listStudent(ctx context.Context, request *listStudentRequest) (list *listStudentResponse, err error) {
+	var (
+		list_student = make([]student_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_students, data_not_exist, err := mssql.StudentDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listStudentResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if data_not_exist {
+		return &listStudentResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	for _, student := range db_students {
+		list_student = append(list_student, withStudentModel(&student))
+	}
+	return &listStudentResponse{
+		Payload: list_student_resp{
+			TotalStudent: len(list_student),
+			ListStudent:  list_student,
 		},
 	}, nil
 }
