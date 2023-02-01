@@ -5,6 +5,7 @@ import (
 	wutil "csdlpt/internal/wUtil"
 	"csdlpt/mssql"
 	"database/sql"
+	"log"
 )
 
 type FacultyModel struct {
@@ -75,6 +76,27 @@ func (ins *faculty) Get(ctx context.Context, db_permit DBPermitModel, ma_kh stri
 					return err
 				}
 			}
+			return nil
+		}
+	)
+	err = mssql.RunQuery(act, withDBConfigModel(&db_permit))
+	return
+}
+
+// Create
+func (ins *faculty) Create(ctx context.Context, db_permit DBPermitModel, faculty FacultyModel) (err error) {
+
+	var (
+		act = func(d *sql.DB) error {
+			query := " USE [TN_CSDLPT] INSERT INTO [dbo].[KHOA] ([MAKH],[TENKH],[MACS]) VALUES ('" + faculty.MaKH + "','" +
+				faculty.TenKH + "','" +
+				faculty.MaCS + "')"
+			log.Println(query)
+			_, err := d.Exec(query)
+			if err != nil {
+				return wutil.NewError(err)
+			}
+
 			return nil
 		}
 	)

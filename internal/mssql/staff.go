@@ -251,7 +251,7 @@ func (ins *staff) CreateLogin(ctx context.Context, db_permit DBPermitModel, staf
 		user_name  = strings.ToUpper(staff.MaGV)
 		role       = strings.ToUpper(staff.TenNhom)
 		act        = func(d *sql.DB) error {
-			query := " DECLARE @R1 int EXEC [SP_TAO_LOGIN] @LGNAME ='" + login_name +
+			query := " USE TN_CSDLPT DECLARE @R1 int EXEC [SP_TAO_LOGIN] @LGNAME ='" + login_name +
 				"',@PASS='123456',@USERNAME ='" + user_name +
 				"', @ROLE='" + role + "', @rs = @R1 OUTPUT SELECT  @R1"
 			log.Println("query: ", query)
