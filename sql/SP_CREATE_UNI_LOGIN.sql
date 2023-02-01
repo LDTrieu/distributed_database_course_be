@@ -79,3 +79,7 @@ SET XACT_ABORT ON
  END CATCH
  
 GO
+
+  @get output
+
+SELECT @get 

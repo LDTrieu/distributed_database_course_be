@@ -94,7 +94,7 @@ func Test_CheckUserName(t *testing.T) {
 		UserName:   "htkn",
 	}
 	// TH204
-	ma_gv := "TH407"
+	ma_gv := "TH219"
 	staff, data_not_exist, err := StaffDBC.CheckUserName(ctx, db_permit, ma_gv)
 	if err != nil {
 		log.Println("ERR: ", err)

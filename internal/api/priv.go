@@ -166,36 +166,6 @@ func __login(ctx context.Context, request *loginRequest) (*loginResponse, error)
 			Message: err.Error(),
 		}, nil
 	}
-	// // exist user_name , password != nil => pass
-	// switch request.Role {
-	// case "giang_vien": // role is giang_vien
-	// 	log.Println("giang_vien")
-
-	// 	user_name, err := mssql.DBServerDBC.GetListCenter(ctx)
-	// 	if err != nil {
-	// 		log.Println("ERR: ", err)
-	// 		return &loginResponse{
-	// 			Code:    model.StatusServiceUnavailable,
-	// 			Message: err.Error()}, err
-
-	// 	}
-	// case "sinh_vien": // role is sinh_vien
-	// 	log.Println("sinh_vien")
-	// case "co_so": // role is co_so
-	// 	log.Println("co_so")
-	// case "truong": // role is truong
-	// 	log.Println("truong")
-	// default:
-	// 	return &loginResponse{
-	// 		Code:    model.StatusDataNotFound,
-	// 		Message: "DATA_NOT_FOUND",
-	// 	}, nil
-	// }
-
-	//log.Println("db_pubs: ", db_pubs)
-	// DB layer to Handle layer
-
-	// call SP_DANG_NHAP
 
 	return &loginResponse{
 		Payload: login_resp{
@@ -232,104 +202,91 @@ func __listStaff(ctx context.Context, request *listStaffRequest) (list *listStaf
 }
 
 func __createStaff(ctx context.Context, request createStaffRequest) (*createStaffResponse, error) {
+	var (
+		// Nếu chưa, tạo tài khoản mới
+		staff = &staff_data{
+			UserName:    request.LoginName,
+			FirstName:   request.FirstName,
+			LastName:    request.LastName,
+			FullName:    request.FullName,
+			Address:     request.Address,
+			FacultyCode: request.FacultyCode,
+			StaffRole:   request.StaffRole,
+		}
+
+		create_login = func() (_ *createStaffResponse, err error) {
+			// Check user_name exist
+			_, data_not_exist, err := mssql.StaffDBC.GetStaffWithoutUserName(ctx, withDBPermit(request.permit), request.LoginName)
+			if err != nil {
+				return &createStaffResponse{
+					Code:    model.StatusServiceUnavailable,
+					Message: err.Error()}, err
+
+			}
+			if !data_not_exist { // Neu exist -> return err
+				return &createStaffResponse{
+					Code:    model.StatusDataDuplicated,
+					Message: "DATA_ALREADY_EXIST"}, nil
+			}
+			// SP tạo GiangVien
+			if err := mssql.StaffDBC.Create(ctx, withDBPermit(request.permit), withStaffData(staff)); err != nil {
+				return &createStaffResponse{
+					Code:    model.StatusServiceUnavailable,
+					Message: err.Error()}, err
+			}
+
+			// run SP tạo đăng nhập
+			if err := mssql.StaffDBC.CreateLogin(ctx, withDBPermit(request.permit), withStaffData(staff)); err != nil {
+				return &createStaffResponse{
+					Code:    model.StatusServiceUnavailable,
+					Message: err.Error()}, err
+			}
+			return &createStaffResponse{}, nil
+		}
+	)
 
 	// Check Permission and StaffRole
 	switch request.Role {
 	case "TRUONG":
-		log.Println("TRUONG")
+		// TH20x
 		if request.StaffRole != "TRUONG" {
 			return &createStaffResponse{
 				Code:    model.StatusForbidden,
 				Message: "NOT_PERMISSION_UNI"}, nil
 		}
-		// RUN
-		// check data_exist (Check Mã Giảng Viên). Input maGV, out data_exist (run View)
-		// request.LoginName TH20x
-		_, data_not_exist, err := mssql.StaffDBC.GetStaffWithoutUserName(ctx, withDBPermit(request.permit), request.LoginName)
+		create_login_resp, err := create_login()
 		if err != nil {
-			return &createStaffResponse{
-				Code:    model.StatusServiceUnavailable,
-				Message: err.Error()}, err
-
-		}
-		if !data_not_exist { // Neu exist -> return err
-			return &createStaffResponse{
-				Code:    model.StatusDataDuplicated,
-				Message: "DATA_ALREADY_EXIST"}, nil
-		}
-
-		// Nếu chưa, tạo tài khoản mới
-		var (
-			staff = &staff_data{
-				UserName:    request.LoginName,
-				FirstName:   request.FirstName,
-				LastName:    request.LastName,
-				FullName:    request.FullName,
-				Address:     request.Address,
-				FacultyCode: request.FacultyCode,
-				StaffRole:   request.StaffRole,
-			}
-		)
-		// SP tạo GiangVien
-		if err := mssql.StaffDBC.Create(ctx, withDBPermit(request.permit), withStaffData(staff)); err != nil {
-			return &createStaffResponse{
-				Code:    model.StatusServiceUnavailable,
-				Message: err.Error()}, err
-		}
-
-		// run SP tạo đăng nhập
-		if err := mssql.StaffDBC.CreateLogin(ctx, withDBPermit(request.permit), withStaffData(staff)); err != nil {
-			return &createStaffResponse{
-				Code:    model.StatusServiceUnavailable,
-				Message: err.Error()}, err
+			return create_login_resp, err
 		}
 
 	case "COSO":
-		log.Println("COSO")
 		switch request.StaffRole {
-		case "GIANGVIEN":
-			// TH50x
-			log.Println("GIANGVIEN")
-
 		case "COSO":
 			// TH30x
-			log.Println("COSO")
-
+			create_login_resp, err := create_login()
+			if err != nil {
+				return create_login_resp, err
+			}
+		case "GIANGVIEN":
+			// TH50x
+			create_login_resp, err := create_login()
+			if err != nil {
+				return create_login_resp, err
+			}
 		default:
 			return &createStaffResponse{
 				Code:    model.StatusForbidden,
 				Message: "NOT_PERMISSION_CENTER"}, nil
 		}
 	case "GIANGVIEN":
-		log.Println("GIANGVIEN")
 		return &createStaffResponse{
 			Code:    model.StatusForbidden,
-			Message: "NOT_PERMISSION_CENTER"}, nil
+			Message: "NOT_PERMISSION_GIANGVIEN"}, nil
 	default:
-		log.Println("ERROR")
 		return &createStaffResponse{
 			Code:    model.StatusDataNotFound,
 			Message: "DATA_NOT_FOUND"}, nil
 	}
-
-	// Check data_exist in DB
-	// data_staff, data_not_exist, err := mssql.StaffDBC.Get(ctx, withDBPermit(request.permit), request.UserName)
-	// if err != nil {
-	// 	return &createStaffResponse{
-	// 		Code:    model.StatusServiceUnavailable,
-	// 		Message: err.Error()}, err
-
-	// }
-	// if data_not_exist {
-	// 	return &createStaffResponse{
-	// 		Code:    model.StatusDataDuplicated,
-	// 		Message: err.Error()}, errors.New("resource already exists")
-	// }
-	// log.Println(data_staff.TenNhom)
-
-	// add item to DB
-	// create account with Staff Permision
-
 	return &createStaffResponse{}, nil
 }
 
