@@ -1,7 +1,8 @@
 package main
 
 import (
-	"csdlpt/internal/api"
+	"csdlpt/internal/api/login"
+	"csdlpt/internal/api/portal"
 
 	"github.com/gin-gonic/gin"
 )
@@ -9,7 +10,8 @@ import (
 func main() {
 	router := gin.Default()
 	router.SetTrustedProxies(nil)
-	api.Reg(router)
+	login.Reg(router)
+	portal.Reg(router)
 
 	router.Run(":8080")
 }
