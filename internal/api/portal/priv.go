@@ -1,4 +1,4 @@
-package api
+package portal
 
 import (
 	"context"
@@ -11,33 +11,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
-
-/* */
-func __pingDB(ctx context.Context) (*pingDBResponse, error) {
-	// get count(*) table
-	a, err := mssql.DBServerDBC.Ping(ctx)
-	if err != nil {
-		log.Println("ERR: ", err)
-	}
-	log.Println(a)
-
-	// get list table
-	return nil, nil
-
-}
-
-/* */
-func __pong(ctx context.Context, request *pongRequest) (*pongResponse, error) {
-	// handle
-	return &pongResponse{
-		Payload: pong_resp{
-			UserName: request.Permit,
-		},
-	}, nil
-}
 
 /* */
 func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.DataJWT, error) {
@@ -104,73 +78,25 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 }
 
 /* */
-// Get DS Phan Manh
-func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
-	// get list publisher_name from DB
-	db_pubs, err := mssql.DBServerDBC.GetListCenter(ctx)
+func __pingDB(ctx context.Context) (*pingDBResponse, error) {
+	// get count(*) table
+	a, err := mssql.DBServerDBC.Ping(ctx)
 	if err != nil {
 		log.Println("ERR: ", err)
-		return &loginInfoResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error()}, err
-
 	}
-	//log.Println("db_pubs: ", db_pubs)
-	// DB layer to Handle layer
-	var (
-		list_center = make([]string, 0)
-	)
+	log.Println(a)
 
-	for _, center := range db_pubs {
-		list_center = append(list_center, string(center))
-	}
+	// get list table
+	return nil, nil
 
-	return &loginInfoResponse{
-		Payload: login_info_resp{
-			ListCenter:  list_center,
-			TotalCenter: len(list_center),
-		},
-	}, nil
 }
 
 /* */
-
-func __login(ctx context.Context, request *loginRequest) (*loginResponse, error) {
-	// Validate request
-	if err := request.validate(); err != nil {
-		return &loginResponse{
-			Code:    model.StatusBadRequest,
-			Message: "DATA_INVALID",
-		}, nil
-	}
-
-	_, ho_ten, staff_role, data_exist, err := mssql.DBServerDBC.Login(ctx, withRequestPermission(request), request.UserName)
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-	if !data_exist {
-		return &loginResponse{
-			Code:    model.StatusDataNotFound,
-			Message: "DATA_NOT_EXIST",
-		}, nil
-	}
-	//validateBearer(ctx, ctx.Req)
-	// Gen auth token
-	_, jwt_login, err := auth.GenerateJWTLoginSession(ctx, request.UserName, ho_ten, staff_role, request.CenterName, uuid.New().String())
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-
-	return &loginResponse{
-		Payload: login_resp{
-			UserName: request.UserName,
-			Token:    jwt_login.Token,
+func __pong(ctx context.Context, request *pongRequest) (*pongResponse, error) {
+	// handle
+	return &pongResponse{
+		Payload: pong_resp{
+			UserName: request.Permit,
 		},
 	}, nil
 }
@@ -355,7 +281,7 @@ func __listClass(ctx context.Context, request *listClassRequest) (list *listClas
 			Message: err.Error()}, err
 
 	}
-	if !data_not_exist {
+	if data_not_exist {
 		return &listClassResponse{
 			Code:    model.StatusDataNotFound,
 			Message: "DATA_NOT_EXIST",
@@ -368,6 +294,115 @@ func __listClass(ctx context.Context, request *listClassRequest) (list *listClas
 		Payload: list_class_resp{
 			TotalClass: len(list_class),
 			ListClass:  list_class,
+		},
+	}, nil
+}
+
+/* */
+func __createClass(ctx context.Context, request createClassRequest) (*createClassResponse, error) {
+	var (
+		class = &class_data{
+			ClassCode:   request.ClassCode,
+			ClassName:   request.ClassName,
+			FacultyCode: request.FacultyCode,
+		}
+	)
+
+	// Check Permission and StaffRole
+	switch request.Role {
+	case "COSO":
+		if err := mssql.ClassDBC.Create(ctx, withDBPermit(request.permit), withClassData(class)); err != nil {
+			return &createClassResponse{
+				Code:    model.StatusServiceUnavailable,
+				Message: err.Error()}, err
+		}
+	default:
+		return &createClassResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION"}, nil
+	}
+
+	return &createClassResponse{}, nil
+}
+
+/* */
+func __listCourse(ctx context.Context, request *listCourseRequest) (list *listCourseResponse, err error) {
+	var (
+		list_course = make([]course_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_courses, data_not_exist, err := mssql.CourseDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listCourseResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if data_not_exist {
+		return &listCourseResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	for _, course := range db_courses {
+		list_course = append(list_course, withCourseModel(&course))
+	}
+	return &listCourseResponse{
+		Payload: list_course_resp{
+			TotalCourse: len(list_course),
+			ListCourse:  list_course,
+		},
+	}, nil
+}
+
+/* */
+func __createCourse(ctx context.Context, request createCourseRequest) (*createCourseResponse, error) {
+	var (
+		course = &course_data{
+			CourseCode: request.CourseCode,
+			CourseName: request.CourseName,
+		}
+	)
+
+	// Check Permission and StaffRole
+	switch request.Role {
+	case "COSO":
+		if err := mssql.CourseDBC.Create(ctx, withDBPermit(request.permit), withCourseData(course)); err != nil {
+			return &createCourseResponse{Code: model.StatusServiceUnavailable, Message: err.Error()}, err
+		}
+	default:
+		return &createCourseResponse{Code: model.StatusForbidden, Message: "NOT_PERMISSION"}, nil
+	}
+
+	return &createCourseResponse{}, nil
+}
+
+/* */
+func __listStudent(ctx context.Context, request *listStudentRequest) (list *listStudentResponse, err error) {
+	var (
+		list_student = make([]student_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_students, data_not_exist, err := mssql.StudentDBC.GetAll(ctx, withDBPermit(request.permit))
+	if err != nil {
+		return &listStudentResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	if data_not_exist {
+		return &listStudentResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST",
+		}, nil
+	}
+	for _, student := range db_students {
+		list_student = append(list_student, withStudentModel(&student))
+	}
+	return &listStudentResponse{
+		Payload: list_student_resp{
+			TotalStudent: len(list_student),
+			ListStudent:  list_student,
 		},
 	}, nil
 }

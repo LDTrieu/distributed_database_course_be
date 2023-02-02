@@ -6,14 +6,14 @@ import (
 	"testing"
 )
 
-func Test_GetAllClass(t *testing.T) {
+func Test_GetAllCourse(t *testing.T) {
 	ctx := context.Background()
 	db_permit := DBPermitModel{
 		CenterName: "CS1",
-		UserName:   "htkn",
+		UserName:   "th301_coso",
 	}
 
-	list, data_not_exist, err := ClassDBC.GetAll(ctx, db_permit)
+	list, data_not_exist, err := CourseDBC.GetAll(ctx, db_permit)
 	if err != nil {
 		log.Println("ERR: ", err)
 	}
@@ -21,21 +21,20 @@ func Test_GetAllClass(t *testing.T) {
 
 }
 
-func Test_CreateClass(t *testing.T) {
+func Test_CreateCourse(t *testing.T) {
 	var (
 		ctx       = context.Background()
 		db_permit = DBPermitModel{
 			CenterName: "CS1",
 			UserName:   "th301_coso",
 		}
-		class_data = ClassModel{
-			MaLop:  "CS4",
-			TenLop: "Vient Thong T 3",
-			MaKH:   "CNTT",
+		course_data = CourseModel{
+			MaMH:  "CS4",
+			TenMH: "Vient Thong T 3",
 		}
 	)
 
-	if err := ClassDBC.Create(ctx, db_permit, class_data); err != nil {
+	if err := CourseDBC.Create(ctx, db_permit, course_data); err != nil {
 		log.Fatal(err)
 	}
 

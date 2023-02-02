@@ -8,24 +8,22 @@ import (
 	"log"
 )
 
-type ClassModel struct {
-	MaLop  string `json:"maLop"`
-	TenLop string `json:"tenLop"`
-	MaKH   string `json:"maKh"`
+type CourseModel struct {
+	MaMH  string `json:"maMH"`
+	TenMH string `json:"tenMH"`
 }
 
-type class struct {
-	maLop  string
-	tenLop string
-	maKh   string
+type course struct {
+	maMH  string
+	tenMH string
 }
 
-var ClassDBC = &class{}
+var CourseDBC = &course{}
 
-func (ins *class) GetAll(ctx context.Context, db_permit DBPermitModel) (list []ClassModel, data_not_exist bool, err error) {
+func (ins *course) GetAll(ctx context.Context, db_permit DBPermitModel) (list []CourseModel, data_not_exist bool, err error) {
 	var (
 		act = func(d *sql.DB) error {
-			query := "USE TN_CSDLPT SELECT TOP (1000) [MALOP], [TENLOP], [MAKH] FROM [LOP];"
+			query := "USE TN_CSDLPT SELECT TOP (1000) [MAMH], [TENMH] FROM [MONHOC];"
 			stmt, err := d.PrepareContext(ctx, query)
 			if err != nil {
 				return wutil.NewError(err)
@@ -38,12 +36,12 @@ func (ins *class) GetAll(ctx context.Context, db_permit DBPermitModel) (list []C
 			defer rows.Close()
 			for rows.Next() {
 				var (
-					class_data ClassModel
+					course_data CourseModel
 				)
-				if err := rows.Scan(&class_data.MaLop, &class_data.TenLop, &class_data.MaKH); err != nil {
+				if err := rows.Scan(&course_data.MaMH, &course_data.TenMH); err != nil {
 					return wutil.NewError(err)
 				}
-				list = append(list, class_data)
+				list = append(list, course_data)
 			}
 			return nil
 		}
@@ -52,16 +50,17 @@ func (ins *class) GetAll(ctx context.Context, db_permit DBPermitModel) (list []C
 	if err == sql.ErrNoRows {
 		return nil, true, nil
 	}
+	if len(list) == 0 {
+		return nil, true, err
+	}
 	return
 }
 
-func (ins *class) Create(ctx context.Context, db_permit DBPermitModel, class ClassModel) (err error) {
+func (ins *course) Create(ctx context.Context, db_permit DBPermitModel, course CourseModel) (err error) {
 
 	var (
 		act = func(d *sql.DB) error {
-			query := "USE [TN_CSDLPT] INSERT INTO [dbo].[LOP] ([MALOP],[TENLOP],[MAKH]) VALUES ('" + class.MaLop + "','" +
-				class.TenLop + "','" +
-				class.MaKH + "')"
+			query := "USE [TN_CSDLPT] INSERT INTO [dbo].[MONHOC] ([MAMH],[TENMH]) VALUES ('" + course.MaMH + "','" + course.TenMH + "')"
 			log.Println(query)
 			_, err := d.Exec(query)
 			if err != nil {
