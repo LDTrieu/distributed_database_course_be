@@ -3,7 +3,9 @@ package testpractice
 import (
 	"context"
 	"csdlpt/internal/auth"
+	"csdlpt/internal/mssql"
 	"csdlpt/library/ascii"
+	"csdlpt/model"
 	"csdlpt/pkg/token"
 	"errors"
 	"fmt"
@@ -72,4 +74,35 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 	println("[AUTH] ", r.RequestURI, "| Data:", data.UserName)
 	println("[AUTH] ", r.RequestURI, "| Access Rights:", fmt.Sprintf("%+v", data))
 	return status, token, data, err
+}
+
+// __getQuestionFilter
+/* */
+func __getQuestionFilter(ctx context.Context, request *getQuestionFilterRequest) (list *getQuestionFilterResponse, err error) {
+	var (
+		list_question = make([]question_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	db_questions, err := mssql.QuestionDBC.GetByStaffCode(ctx, withDBPermit(request.permit), "string")
+	if err != nil {
+		return &getQuestionFilterResponse{
+			Code:    model.StatusServiceUnavailable,
+			Message: err.Error()}, err
+
+	}
+	// if data_not_exist {
+	// 	return &getQuestionFilterResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST",
+	// 	}, nil
+	// }
+	for _, question := range db_questions {
+		list_question = append(list_question, withQuestionModel(&question))
+	}
+	return &getQuestionFilterResponse{
+		Payload: filter_question_resp{
+			Total:        len(list_question),
+			ListQuestion: list_question,
+		},
+	}, nil
 }

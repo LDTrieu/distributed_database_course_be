@@ -53,21 +53,7 @@ BEGIN
 			BEGIN-- thiếu đề
 				RAISERROR('Không đủ số câu để tạo đề!', 16, 1)
 			END
-			ELSE IF(@countCauHoiSiteKhac >= @soCauThi - @countCauHoi)
-			BEGIN
-				--UNION 2 SELECT random câu hỏi của giáo viên cả 2 site
-				SELECT * FROM ( 
-					SELECT TOP (@countCauHoi) CAUHOI, NOIDUNG, A,B,C,D,DAP_AN FROM BODE 
-					WHERE MAMH = @maMH AND TRINHDO = @trinhDo AND MAGV IN (SELECT MAGV FROM GIAOVIEN WHERE MAKH IN (SELECT MAKH FROM KHOA))  
-					ORDER BY NEWID()
-				) AS SITEHT
-				UNION ALL
-				SELECT * FROM ( 
-					SELECT TOP (@soCauThi - @countCauHoiSiteKhac) CAUHOI, NOIDUNG, A,B,C,D,DAP_AN FROM BODE 
-					WHERE MAMH = @maMH AND TRINHDO = @trinhDo AND MAGV NOT IN (SELECT MAGV FROM GIAOVIEN WHERE MAKH IN (SELECT MAKH FROM KHOA))  
-					ORDER BY  NEWID()
-				) AS SITEKHAC
-			END
+
 		END
 	END
 	-- Trình độ A hoặc B
