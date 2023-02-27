@@ -81,7 +81,7 @@ func (ins *dbServer) GetListCenter(ctx context.Context) (list []string, err erro
 }
 
 func (ins *dbServer) Login(ctx context.Context, db_permit DBPermitModel, login_name string) (
-	maGv, hoTen, tenNhom string, data_exist bool, err error) {
+	maGv, hoTen, ho, ten, tenNhom string, data_exist bool, err error) {
 	data_exist = true
 	var (
 		act = func(d *sql.DB) error {
@@ -109,6 +109,9 @@ func (ins *dbServer) Login(ctx context.Context, db_permit DBPermitModel, login_n
 				if ho_ten.Valid {
 					hoTen = ho_ten.String
 				}
+				ho = "HO"
+				ten = "TEN"
+
 				//list = append(list, ten_cn)
 			}
 			return nil
@@ -119,5 +122,6 @@ func (ins *dbServer) Login(ctx context.Context, db_permit DBPermitModel, login_n
 	if len(maGv) < 1 {
 		data_exist = false
 	}
+
 	return
 }

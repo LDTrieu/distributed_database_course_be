@@ -2,9 +2,9 @@ package testpractice
 
 import "csdlpt/internal/mssql"
 
-type traceField struct {
-	RequestId string `json:"reqId"`
-}
+// type traceField struct {
+// 	RequestId string `json:"reqId"`
+// }
 
 type permit struct {
 	UserName   string `json:"userName"`

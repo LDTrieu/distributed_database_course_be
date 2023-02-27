@@ -356,6 +356,60 @@ func __listCourse(ctx context.Context, request *listCourseRequest) (list *listCo
 }
 
 /* */
+func __listMockCourse(ctx context.Context, request *listMockCourseRequest) (list *listMockCourseResponse, err error) {
+	var (
+		list_mock_course = make([]mock_course_data, 0)
+		//db_classes = make([]mssql.ClassModel, 0)
+	)
+	// db_courses, data_not_exist, err := mssql.CourseDBC.GetAll(ctx, withDBPermit(request.permit))
+	// if err != nil {
+	// 	return &listCourseResponse{
+	// 		Code:    model.StatusServiceUnavailable,
+	// 		Message: err.Error()}, err
+
+	// }
+	// if data_not_exist {
+	// 	return &listCourseResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST",
+	// 	}, nil
+	// }
+	// for _, course := range db_courses {
+	// 	list_course = append(list_mock_course, withCourseModel(&course))
+	// }
+	ele := mock_course_data{
+		CourseCode:     "1",
+		CourseName:     "Khóa nhập môn TOEIC - Các kiến thức nền tảng",
+		Image:          "http://res.cloudinary.com/doxsstgkc/image/upload/v1675147193/examify/image2_efnpkj.png",
+		Level:          "general",
+		Charges:        true,
+		PointToUnlock:  0,
+		PointReward:    2000,
+		QuantityRating: 0,
+		AvgRating:      "0.00",
+		Participants:   3,
+		Price:          1000,
+		Discount:       10,
+		TotalChapter:   5,
+		TotalLesson:    24,
+		TotalVideoTime: 1,
+		Achieves:       "<p>Xây dựng được một nền tảng vững chắc để đi bước đầu trên con đường học TOEIC</p><p>Thích nghi với các dạng khó hơn trong đề thi TOEIC về sau</p>",
+		Description:    "<ol><li>Trợ động từ, động từ đặc biệt</li><li>Rút gọn mệnh đề quan hệ</li><li>Động từ V1 - To V1 - V-ing</li><li>Phân từ (- ed, - ing) và mệnh đề phân từ</li><li>Sự phủ định và công thức song song</li><li>Các dạng so sánh (hơn - bằng - nhất ...)</li></ol>",
+		CreateBy:       1,
+		CreatedAt:      "2023-01-31T06:39:53.875Z",
+		UpdatedAt:      "2023-02-22T17:46:15.100Z",
+		IsJoin:         true,
+	}
+	list_mock_course = append(list_mock_course, ele)
+	return &listMockCourseResponse{
+		Payload: list_mock_course_resp{
+			TotalCourse: 1,
+			ListCourse:  list_mock_course,
+		},
+	}, nil
+}
+
+/* */
 func __createCourse(ctx context.Context, request createCourseRequest) (*createCourseResponse, error) {
 	var (
 		course = &course_data{

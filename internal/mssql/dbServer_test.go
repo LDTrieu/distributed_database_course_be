@@ -33,14 +33,14 @@ func Test_Login(t *testing.T) {
 		CenterName: "CS1",
 		UserName:   "sa",
 	}
-	ma_gv, ho_ten, ten_nhom, data_exist, err := DBServerDBC.Login(ctx, db_permit, userName)
+	ma_gv, ho_ten, ho, ten, ten_nhom, data_exist, err := DBServerDBC.Login(ctx, db_permit, userName)
 	if err != nil {
 		log.Fatal(err)
 	}
 	if data_exist == false {
 		log.Println("DATA_NOT_EXIST")
 	}
-	log.Println("ma_gv", ma_gv, "ho_ten", ho_ten, "ten_nhom", ten_nhom)
+	log.Println("ma_gv", ma_gv, "ho_ten", ho_ten, "ho", ho, "ten", ten, "ten_nhom", ten_nhom)
 	log.Fatal("OKKK")
 	//log.Fatal("login_info: ", login_info.hoTen)
 }
