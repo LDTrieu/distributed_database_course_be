@@ -1,4 +1,4 @@
-package testpractice
+package exam
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"csdlpt/pkg/token"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 )
 
@@ -105,4 +106,35 @@ func __getQuestionFilter(ctx context.Context, request *getQuestionFilterRequest)
 			ListQuestion: list_question,
 		},
 	}, nil
+}
+
+/* */
+func __createQuestion(ctx context.Context, request *createQuestionRequest) (resp *createQuestionResponse, err error) {
+	if request.Role != "GIANGVIEN" {
+		return &createQuestionResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION_STAFF"}, nil
+	}
+	id, err := ascii.GetID(request.UserName)
+	if err != nil {
+		return &createQuestionResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST"}, nil
+	}
+	log.Println("request", request)
+	var (
+		question = &question_data{
+			StaffCode:     id,
+			Content:       request.Content,
+			ChooseA:       request.ChooseA,
+			ChooseB:       request.ChooseB,
+			ChooseC:       request.ChooseC,
+			ChooseD:       request.ChooseD,
+			CorrectAnswer: request.CorrectAnswer,
+			Level:         request.Level,
+			CourseCode:    request.CourseCode,
+		}
+	)
+	log.Println("question", question)
+	return &createQuestionResponse{}, nil
 }

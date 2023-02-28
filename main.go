@@ -1,9 +1,9 @@
 package main
 
 import (
+	"csdlpt/internal/api/exam"
 	"csdlpt/internal/api/login"
 	"csdlpt/internal/api/portal"
-	"csdlpt/internal/api/testpractice"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -22,7 +22,7 @@ func main() {
 
 	login.Reg(router)
 	portal.Reg(router)
-	testpractice.Reg((router))
+	exam.Reg((router))
 
 	//router.Use(cors.New(config))
 	router.Run(":8080")

@@ -32,13 +32,6 @@ func Reg(router *gin.Engine) {
 	router.GET("/api/portal/list/mock-course", mockListCourse) //mock
 	router.POST("/api/portal/create/course", createCourse)
 
-	// Giang Vien Dang Ky - Tạo kỳ thi
-	//router.GET("/api/portal/list/exam", listExam)
-
-	// Bo De - Câu hỏi
-
-	// Thi
-
 }
 
 /* */
@@ -210,6 +203,7 @@ func listClass(c *gin.Context) {
 			},
 		}
 	)
+	
 	resp, err := __listClass(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
