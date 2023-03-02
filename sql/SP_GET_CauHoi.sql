@@ -1,4 +1,6 @@
 
+
+
 /****** Object:  StoredProcedure [dbo].[SP_GET_CauHoi]    Script Date: 4/24/2022 10:06:17 AM ******/
 SET ANSI_NULLS ON
 GO
@@ -9,7 +11,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE [dbo].[SP_GET_CauHoi]
+ALTER PROCEDURE [dbo].[SP_GET_CauHoi]
 	@maMH nchar(5), @trinhDo nchar(1), @soCauThi int
 AS
 BEGIN

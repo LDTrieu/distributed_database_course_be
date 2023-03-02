@@ -29,11 +29,8 @@ func Reg(router *gin.Engine) {
 
 	// Course
 	router.GET("/api/portal/list/course", listCourse)
+	router.GET("/api/portal/list/mock-course", mockListCourse) //mock
 	router.POST("/api/portal/create/course", createCourse)
-
-	// Giang Vien Dang Ky
-
-	// Bo De
 
 }
 
@@ -206,6 +203,7 @@ func listClass(c *gin.Context) {
 			},
 		}
 	)
+	
 	resp, err := __listClass(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
@@ -263,6 +261,30 @@ func listCourse(c *gin.Context) {
 		}
 	)
 	resp, err := __listCourse(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+/* */
+func mockListCourse(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+	var (
+		request = listMockCourseRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+	resp, err := __listMockCourse(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
 	}

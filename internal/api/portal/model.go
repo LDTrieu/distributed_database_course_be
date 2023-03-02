@@ -292,6 +292,43 @@ func withCourseData(cd *course_data) mssql.CourseModel {
 }
 
 /* */
+type listMockCourseRequest struct {
+	permit
+}
+type listMockCourseResponse struct {
+	Code    int                   `json:"code"`
+	Message string                `json:"message"`
+	Payload list_mock_course_resp `json:"payload"`
+}
+type list_mock_course_resp struct {
+	TotalCourse int                `json:"totalCourse"`
+	ListCourse  []mock_course_data `json:"listCourse"`
+}
+type mock_course_data struct {
+	CourseCode     string `json:"id"`
+	CourseName     string `json:"name"`
+	Image          string `json:"image"`
+	Level          string `json:"name"`
+	Charges        bool   `json:"name"`
+	PointToUnlock  int    `json:"name"`
+	PointReward    int    `json:"name"`
+	QuantityRating int    `json:"name"`
+	AvgRating      string `json:"name"`
+	Participants   int    `json:"name"`
+	Price          int    `json:"name"`
+	Discount       int    `json:"name"`
+	TotalChapter   int    `json:"name"`
+	TotalLesson    int    `json:"name"`
+	TotalVideoTime int    `json:"totalVideoTime"`
+	Achieves       string `json:"achieves"`
+	Description    string `json:"description"`
+	CreateBy       int    `json:"createBy"`
+	CreatedAt      string `json:"createdAt"`
+	UpdatedAt      string `json:"updatedAt"`
+	IsJoin         bool   `json:"isJoin"`
+}
+
+/* */
 type createCourseRequest struct {
 	permit
 	CourseCode string `json:"courseCode"`

@@ -27,7 +27,6 @@ func withDBPermit(p permit) mssql.DBPermitModel {
 }
 
 /* */
-
 type loginInfoResponse struct {
 	Code    int             `json:"code"`
 	Message string          `json:"message"`
@@ -53,8 +52,10 @@ type loginResponse struct {
 }
 
 type login_resp struct {
-	UserName string `json:"userName"`
-	Token    string `json:"token"`
+	UserName  string `json:"userName"`
+	FirstName string `json:"firstName"`
+	LastName  string `json:"lastName"`
+	Token     string `json:"token"`
 }
 
 func withRequestPermission(request *loginRequest) mssql.DBPermitModel {
@@ -83,4 +84,28 @@ func (ins *loginRequest) validate() error {
 	}
 
 	return nil
+}
+
+/* */
+type getUserMeRequest struct {
+	permit
+}
+type getUserMeResponse struct {
+	Code    int          `json:"code"`
+	Message string       `json:"message"`
+	Payload info_user_me `json:"payload"`
+}
+type info_user_me struct {
+	UserName         string `json:"email"`
+	FirstName        string `json:"firstName"`
+	LastName         string `json:"lastName"`
+	DateOfBirth      string `json:"dateOfBirth"`
+	PhoneNumber      string `json:"phoneNumber"`
+	Avt              string `json:"avt"`
+	Banner           string `json:"banner"`
+	Description      string `json:"description"`
+	AccumulatedPoint string `json:"accumulatedPoint"`
+	RankPoint        string `json:"rankPoint"`
+	RoleName         string `json:"roleName"`
+	UserId           string `json:"userId"`
 }

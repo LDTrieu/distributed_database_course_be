@@ -1,4 +1,4 @@
-package login
+package exam
 
 import (
 	"context"
@@ -11,8 +11,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-
-	"github.com/google/uuid"
 )
 
 /* */
@@ -79,94 +77,95 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 	return status, token, data, err
 }
 
+// __getQuestionFilter
 /* */
-// Get DS Phan Manh
-func __loginInfo(ctx context.Context) (*loginInfoResponse, error) {
-	// get list publisher_name from DB
-	db_pubs, err := mssql.DBServerDBC.GetListCenter(ctx)
+func __getQuestionFilter(ctx context.Context, request *getQuestionFilterRequest) (list *getQuestionFilterResponse, err error) {
+	var (
+		list_question = make([]question_data, 0)
+	)
+	db_questions, err := mssql.QuestionDBC.GetByStaffCode(ctx, withDBPermit(request.permit), "string")
 	if err != nil {
-		log.Println("ERR: ", err)
-		return &loginInfoResponse{
+		return &getQuestionFilterResponse{
 			Code:    model.StatusServiceUnavailable,
 			Message: err.Error()}, err
 
 	}
-	//log.Println("db_pubs: ", db_pubs)
-	// DB layer to Handle layer
+	// if data_not_exist {
+	// 	return &getQuestionFilterResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST",
+	// 	}, nil
+	// }
+	for _, question := range db_questions {
+		list_question = append(list_question, withQuestionModel(&question))
+	}
+	return &getQuestionFilterResponse{
+		Payload: filter_question_resp{
+			Total:        len(list_question),
+			ListQuestion: list_question,
+		},
+	}, nil
+}
+
+/* */
+func __createQuestion(ctx context.Context, request *createQuestionRequest) (resp *createQuestionResponse, err error) {
+	if request.Role != "GIANGVIEN" {
+		return &createQuestionResponse{
+			Code:    model.StatusForbidden,
+			Message: "NOT_PERMISSION_STAFF"}, nil
+	}
+	id, err := ascii.GetID(request.UserName)
+	if err != nil {
+		return &createQuestionResponse{
+			Code:    model.StatusDataNotFound,
+			Message: "DATA_NOT_EXIST"}, nil
+	}
+	log.Println("request", request)
 	var (
-		list_center = make([]string, 0)
+		question = &question_data{
+			StaffCode:     id,
+			Content:       request.Content,
+			ChooseA:       request.ChooseA,
+			ChooseB:       request.ChooseB,
+			ChooseC:       request.ChooseC,
+			ChooseD:       request.ChooseD,
+			CorrectAnswer: request.CorrectAnswer,
+			Level:         request.Level,
+			CourseCode:    request.CourseCode,
+		}
+	)
+	log.Println("question", question)
+	return &createQuestionResponse{}, nil
+}
+
+/* */
+func __getLastestExam(ctx context.Context, request *getLastestExamRequest) (resp *getLastestExamResponse, err error) {
+	// if request.Role != "SINHVIEN" {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusForbidden,
+	// 		Message: "NOT_PERMISSION_STUDENT"}, nil
+	// }
+
+	// id, err := ascii.GetID(request.UserName)
+	// if err != nil {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST"}, nil
+	// }
+
+	var (
+		list_exam = make([]exam_data, 0)
 	)
 
-	for _, center := range db_pubs {
-		list_center = append(list_center, string(center))
+	// mock_data
+	for _, ele := range ExamList {
+		list_exam = append(list_exam, ele)
 	}
 
-	return &loginInfoResponse{
-		Payload: login_info_resp{
-			ListCenter:  list_center,
-			TotalCenter: len(list_center),
-		},
-	}, nil
-}
-
-/* */
-
-func __login(ctx context.Context, request *loginRequest) (*loginResponse, error) {
-	// Validate request
-	if err := request.validate(); err != nil {
-		return &loginResponse{
-			Code:    model.StatusBadRequest,
-			Message: "DATA_INVALID",
-		}, nil
-	}
-	log.Println(request)
-
-	_, ho_ten, first_name, last_name, staff_role, data_exist, err := mssql.DBServerDBC.Login(ctx, withRequestPermission(request), request.UserName)
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-	if !data_exist {
-		return &loginResponse{
-			Code:    model.StatusDataNotFound,
-			Message: "DATA_NOT_EXIST",
-		}, nil
-	}
-	//validateBearer(ctx, ctx.Req)
-	// Gen auth token
-	_, jwt_login, err := auth.GenerateJWTLoginSession(ctx, request.UserName, ho_ten, staff_role, request.CenterName, uuid.New().String())
-	if err != nil {
-		return &loginResponse{
-			Code:    model.StatusServiceUnavailable,
-			Message: err.Error(),
-		}, nil
-	}
-
-	return &loginResponse{
-		Payload: login_resp{
-			UserName:  request.UserName,
-			FirstName: first_name,
-			LastName:  last_name,
-			Token:     jwt_login.Token,
-		},
-	}, nil
-}
-
-/* */
-func __getMe(ctx context.Context, request *getUserMeRequest) (*getUserMeResponse, error) {
-
-	return &getUserMeResponse{
-		Payload: info_user_me{
-			UserName:    request.UserName,
-			RoleName:    request.Role,
-			FirstName:   "FirstName",
-			LastName:    "LastName",
-			PhoneNumber: "0948518286",
-			Avt:         "https://media.istockphoto.com/id/1223671392/vector/default-profile-picture-avatar-photo-placeholder-vector-illustration.jpg?s=170667a&w=0&k=20&c=m-F9Doa2ecNYEEjeplkFCmZBlc5tm1pl1F7cBCh9ZzM=",
-			Banner:      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAX8AAACECAMAAABPuNs7AAAACVBMVEWAgICLi4uUlJSuV9pqAAABI0lEQVR4nO3QMQEAAAjAILV/aGPwjAjMbZybnTjbP9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b/Vv9W/1b+1cxvnHi9hBAfkOyqGAAAAAElFTkSuQmCC",
-			UserId:      "123",
+	return &getLastestExamResponse{
+		Payload: filter_lastest_exam{
+			Total:           len(list_exam),
+			ListLastestExam: list_exam,
 		},
 	}, nil
 }
