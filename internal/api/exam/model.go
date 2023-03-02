@@ -128,3 +128,51 @@ type exam_data struct {
 	NumsJoin     int       `json:"numsJoin"`
 	CreatedAt    time.Time `json:"createdAt"`
 }
+
+/* */
+type getTakingExamRequest struct {
+	permit
+	ExamId string `json:"examId"`
+}
+type getTakingExamResponse struct {
+	Code    int              `json:"code"`
+	Message string           `json:"message"`
+	Payload taking_exam_resp `json:"payload"`
+}
+type taking_exam_resp struct {
+	Status         int                `json:"status"`
+	ExamName       string             `json:"examName"`
+	Audio          string             `json:"audio"`
+	ExamSeriesName string             `json:"examSeriesName"`
+	Data           []exam_taking_data `json:"data"`
+}
+type exam_taking_data struct {
+	ID              int                         `json:"id"`
+	Part            string                      `json:"part"`
+	SetQuestionList []exam_taking_question_data `json:"setQuestionList"`
+}
+
+type exam_taking_question_data struct {
+	ID          int                 `json:"id"`
+	Title       string              `json:"title"`
+	Audio       string              `json:"audio"`
+	Side        []side_data         `json:"side"`
+	SetQuestion []set_question_data `json:"setQuestion"`
+}
+type side_data struct {
+	Seq     int    `json:"seq"`
+	Content string `json:"content"`
+}
+
+type set_question_data struct {
+	Id         int                `json:"id"`
+	Seq        int                `json:"seq"`
+	Name       string             `json:"name"`
+	ChoiceList []choice_list_data `json:"choiceList"`
+}
+
+type choice_list_data struct {
+	Id      int    `json:"id"`
+	Seq     int    `json:"seq"`
+	Content string `json:"content"`
+}

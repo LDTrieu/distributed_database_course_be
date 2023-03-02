@@ -169,3 +169,33 @@ func __getLastestExam(ctx context.Context, request *getLastestExamRequest) (resp
 		},
 	}, nil
 }
+
+/* */
+
+func __getTakingExam(ctx context.Context, request *getTakingExamRequest) (resp *getTakingExamResponse, err error) {
+	// if request.Role != "SINHVIEN" {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusForbidden,
+	// 		Message: "NOT_PERMISSION_STUDENT"}, nil
+	// }
+
+	// id, err := ascii.GetID(request.UserName)
+	// if err != nil {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST"}, nil
+	// }
+
+	// var (
+	// 	list_exam = make([]exam_taking_data, 0)
+	// )
+
+	// mock_data
+	// for _, ele := range ExamTakingList {
+	// 	list_exam = append(list_exam, ele)
+	// }
+
+	return &getTakingExamResponse{
+		Payload: ExamTakingList,
+	}, nil
+}

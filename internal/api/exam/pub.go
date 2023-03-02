@@ -2,6 +2,7 @@ package exam
 
 import (
 	"csdlpt/pkg/wlog"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -19,7 +20,8 @@ func Reg(router *gin.Engine) {
 	router.POST("/api/portal/create/question", createQuestion)
 
 	// Thi
-	router.GET("/api/exam/list/latest-exam", getLastestExam) // Latest exam
+	router.GET("/api/exam/list/latest-exam", getLastestExam)     // Latest exam
+	router.GET("/api/exam/list/exam-takingg/:id", getTakingExam) // Full Exam
 
 }
 
@@ -98,6 +100,34 @@ func getLastestExam(c *gin.Context) {
 	)
 
 	resp, err := __getLastestExam(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+/* */
+func getTakingExam(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+
+	var (
+		request = getTakingExamRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+			ExamId: c.Param("id"),
+		}
+	)
+	log.Println("ExamId: ", request.ExamId)
+
+	resp, err := __getTakingExam(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
 	}
