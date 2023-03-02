@@ -1,6 +1,9 @@
 package exam
 
-import "csdlpt/internal/mssql"
+import (
+	"csdlpt/internal/mssql"
+	"time"
+)
 
 // type traceField struct {
 // 	RequestId string `json:"reqId"`
@@ -87,4 +90,41 @@ type createQuestionResponse struct {
 }
 
 type create_question_resp struct {
+}
+
+/* */
+type getLastestExamRequest struct {
+	permit
+}
+
+type getLastestExamResponse struct {
+	Code    int                 `json:"code"`
+	Message string              `json:"message"`
+	Payload filter_lastest_exam `json:"payload"`
+}
+
+type filter_lastest_exam struct {
+	Total           int         `json:"total"`
+	ListLastestExam []exam_data `json:"listLastestExam"`
+}
+
+type exam_data struct {
+	ID            string    `json:"id"`
+	CourseCode    string    `json:"courseCode"`
+	ClassCode     string    `json:"classCode"`
+	Level         string    `json:"level"`
+	STExam        int       `json:"stExam"`
+	TotalQuestion int       `json:"totalQuestion"`
+	Duration      int       `json:"duration"`
+	ExamDay       time.Time `json:"examDay"`
+
+	Audio        string    `json:"audio"`
+	ExamSeriesId int       `json:"examSeriesId"`
+	Hashtag      []string  `json:"hashtag"`
+	Name         string    `json:"name"`
+	TotalPart    int       `json:"totalPart"`
+	TotalComment int       `json:"totalComment"`
+	PointReward  int       `json:"pointReward"`
+	NumsJoin     int       `json:"numsJoin"`
+	CreatedAt    time.Time `json:"createdAt"`
 }

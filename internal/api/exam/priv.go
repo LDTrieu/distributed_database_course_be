@@ -82,7 +82,6 @@ func validateBearer(ctx context.Context, r *http.Request) (int, string, *auth.Da
 func __getQuestionFilter(ctx context.Context, request *getQuestionFilterRequest) (list *getQuestionFilterResponse, err error) {
 	var (
 		list_question = make([]question_data, 0)
-		//db_classes = make([]mssql.ClassModel, 0)
 	)
 	db_questions, err := mssql.QuestionDBC.GetByStaffCode(ctx, withDBPermit(request.permit), "string")
 	if err != nil {
@@ -137,4 +136,36 @@ func __createQuestion(ctx context.Context, request *createQuestionRequest) (resp
 	)
 	log.Println("question", question)
 	return &createQuestionResponse{}, nil
+}
+
+/* */
+func __getLastestExam(ctx context.Context, request *getLastestExamRequest) (resp *getLastestExamResponse, err error) {
+	// if request.Role != "SINHVIEN" {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusForbidden,
+	// 		Message: "NOT_PERMISSION_STUDENT"}, nil
+	// }
+
+	// id, err := ascii.GetID(request.UserName)
+	// if err != nil {
+	// 	return &getLastestExamResponse{
+	// 		Code:    model.StatusDataNotFound,
+	// 		Message: "DATA_NOT_EXIST"}, nil
+	// }
+
+	var (
+		list_exam = make([]exam_data, 0)
+	)
+
+	// mock_data
+	for _, ele := range ExamList {
+		list_exam = append(list_exam, ele)
+	}
+
+	return &getLastestExamResponse{
+		Payload: filter_lastest_exam{
+			Total:           len(list_exam),
+			ListLastestExam: list_exam,
+		},
+	}, nil
 }

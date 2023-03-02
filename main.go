@@ -22,7 +22,7 @@ func main() {
 
 	login.Reg(router)
 	portal.Reg(router)
-	exam.Reg((router))
+	exam.Reg(router)
 
 	//router.Use(cors.New(config))
 	router.Run(":8080")

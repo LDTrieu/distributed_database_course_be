@@ -19,6 +19,7 @@ func Reg(router *gin.Engine) {
 	router.POST("/api/portal/create/question", createQuestion)
 
 	// Thi
+	router.GET("/api/exam/list/latest-exam", getLastestExam) // Latest exam
 
 }
 
@@ -71,6 +72,32 @@ func createQuestion(c *gin.Context) {
 	}
 
 	resp, err := __createQuestion(c.Request.Context(), &request)
+	if err != nil {
+		wlog.Error(c, err)
+	}
+	c.JSON(http.StatusOK, resp)
+}
+
+// getLastestExam
+func getLastestExam(c *gin.Context) {
+	status, _, data, err := validateBearer(c.Request.Context(), c.Request)
+	if err != nil {
+		c.AbortWithError(status, err)
+		return
+	}
+
+	var (
+		request = getLastestExamRequest{
+			permit: permit{
+				UserName:   data.UserName,
+				FullName:   data.FullName,
+				CenterName: data.CenterName,
+				Role:       data.Role,
+			},
+		}
+	)
+
+	resp, err := __getLastestExam(c.Request.Context(), &request)
 	if err != nil {
 		wlog.Error(c, err)
 	}
